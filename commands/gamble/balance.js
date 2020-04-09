@@ -1,8 +1,12 @@
+const db = require("./db")
+
 
 module.exports = {
     name: 'balance',
+    alias: ["bal"],
     description: 'Balance check',
-    execute(msg, args) {
-        msg.reply(`Your balance is: ${"0 points"}`);
+    async execute(msg, args) {
+        let user = await db.initUser(msg.author.id)
+        msg.reply(`Your balance is: $${user.balance}`);
     },
 };
