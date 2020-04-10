@@ -7,6 +7,6 @@ module.exports = {
     description: 'Balance check',
     async execute(msg, args) {
         let user = await db.initUser(msg.author.id)
-        msg.reply(`Your balance is: $${user.balance}`);
+        msg.reply(`Your balance is: $${user.balance} (Doesn't include money from active games)`);
     },
 };
