@@ -34,8 +34,6 @@ async function getUser(id) {
 
 module.exports = {
     async initUser(id) {
-        console.log(await users.count({_id: "299983320815763456"}))
-
         let user = await getUser(id)
         if (!user) user = await createUser(id)
         return user
