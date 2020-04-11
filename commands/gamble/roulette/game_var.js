@@ -42,6 +42,9 @@ game.tempBalance = {}
 game.active_channel = null
 game.lastDraw = new Date()
 game.usersToUpdate = {}
+game.time = null
+game.info = null
+game.timeLimit = 0
 
 
 // These are used to map the positions for calculation when inserting into the board

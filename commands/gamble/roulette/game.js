@@ -1,5 +1,10 @@
 const db = require("../db")
-const conf = { minimumBetInside: 1000, minimumBetOutside: 1000, duration: 100, minTime: 2 }
+const conf = {
+    minimumBetInside: 1000,  // Minimun Bet for single numbers
+    minimumBetOutside: 1000, // Miniumun bet for <even, odd, ...>
+    duration: 100, // Duration in seconds of the game
+    minTime: 2//Minium time between board-draws
+}
 
 const board = require("./board")
 let game = require("./game_var")
@@ -13,9 +18,10 @@ module.exports = [{
         if (!game.active.game) {
             game.active = { game: true, betting: true, board: true }
             msg.channel.send("Started a roulette game. Use !bet to place your bets")
-            //timeout for finish of the game
-            //interval for letting know game is about to finish
+
             game.time = setTimeout(() => { rollNumber(msg) }, conf.duration * 1000)
+            game.info = setInterval(() => { info() }, 1000)
+            game.timeLimit = conf.duration
             game.active_channel = msg.channel
             printBoard()
         } else {
@@ -55,13 +61,7 @@ module.exports = [{
             msg.reply("There are no games running currently")
         }
     },
-}, {
-    name: 'ping',
-    description: 'Test command. Returns "pong"',
-    execute(msg, args) {
-        msg.channel.send('pong');
-    },
-}, {
+},{
     name: "bet",
     description: "Bet in an active roulette game game. Usage: !bet <amount to bet> <number, red, black, even, odd, 1st, 2nd, 3rd, 1-18,19-36>",
     async execute(msg, args) {
@@ -94,13 +94,13 @@ module.exports = [{
                 msg.reply("You dont have that money in your bank account. Usage: !bet <amount to bet> <number, red, black, even, odd, 1st, 2nd, 3rd, 1-18,19-36>")
                 return
             }
-            var bet = {
+            let bet = {
                 type: args[1].toLowerCase(),
                 amount,
                 player: msg.author.id
             };
-            if (bet.type == 'red' || bet.type == 'black' || bet.type == 'even' || bet.type == 'odd' || bet.type === '1-18' || bet.type === '19-36' ||
-                bet.type === '1st' || bet.type === '2nd' || bet.type === '3rd') {
+            if (bet.type == 'red' || bet.type == 'black' || bet.type == 'even' || bet.type == 'odd' || bet.type === '1-18' || bet.type === '19-36' || bet.type == 'top' || bet.type == 'mid' ||
+            bet.type == 'bot' || bet.type === '1st' || bet.type === '2nd' || bet.type === '3rd') {
                 if (bet.amount < conf.minimumBetOutside) {
                     game.active_channel.send(`${bet.type}/${bet.amount} You have to bet at least $${conf.minimumBetOutside} for bets on groups.`);
                     return
@@ -137,9 +137,18 @@ module.exports = [{
 }
 ]
 
+function info() {
+    if (game.timeLimit % 15 == 0) {
+        game.active_channel.send(`${game.timeLimit} seconds remaining! Place your bets!`);
+    } else if (game.timeLimit == 20 || game.timeLimit == 10) {
+        printBoard();
+        game.active_channel.send(`${game.timeLimit} seconds remaining! Place your bets!`);
+    }
+    game.timeLimit -= 1;
+}
 
 const resetRows = () => {
-    for (var i = 0; i < game.topRow.length; i++) {
+    for (let i = 0; i < game.topRow.length; i++) {
         game.topRow[i].count = 0;
         game.middleRow[i].count = 0;
         game.bottomRow[i].count = 0;
@@ -154,6 +163,8 @@ const resetGame = () => {
     game.active_channel = null
     game.tempBalance = {}
     game.usersToUpdate = {}
+    clearInterval(game.info)
+    clearTimeout(game.time)
     resetRows();
     board.boardRow4 = '|  |    |    |    |    |    |    |    |    |    |    |    |    ||     |\n';
     board.boardRow8 = '|  |    |    |    |    |    |    |    |    |    |    |    |    ||     |\n';
@@ -165,15 +176,14 @@ const resetGame = () => {
 async function printBoard(force = false) {
     if (!force && (new Date() - game.lastDraw) / 1000 < conf.minTime) return
     game.lastDraw = new Date()
-    for (var i = 0; i < game.bets.length; i++) {
+    for (let i = 0; i < game.bets.length; i++) {
         let bet = game.bets[i]
-        console.log("Trying to draw this bet:", bet)
-        var indexOfTop = game.idMapTop.indexOf(parseInt(bet.type));
-        var indexOfMid = game.idMapMid.indexOf(parseInt(bet.type));
-        var indexOfBot = game.idMapBot.indexOf(parseInt(bet.type));
+        let indexOfTop = game.idMapTop.indexOf(parseInt(bet.type));
+        let indexOfMid = game.idMapMid.indexOf(parseInt(bet.type));
+        let indexOfBot = game.idMapBot.indexOf(parseInt(bet.type));
 
         let user = await db.initUser(bet.player)
-        var symbolToUse = user.symbol;
+        let symbolToUse = user.symbol;
 
         if (bet.type == 'red' && game.redCount.number < 30 && game.redCount.symbols.indexOf(symbolToUse) == -1) {
             game.redCount.number += 1;
@@ -235,21 +245,21 @@ async function printBoard(force = false) {
             }
         } else if (indexOfTop > -1 && game.topRow[indexOfTop].count < 4) {
             if (game.topRow[indexOfTop].symbols.indexOf(symbolToUse) == -1) {
-                var indexPut = parseInt(bet.type) + game.topRow[indexOfTop].count + ((indexOfTop + 1) * 2) - 1;
+                let indexPut = parseInt(bet.type) + game.topRow[indexOfTop].count + ((indexOfTop + 1) * 2) - 1;
                 game.topRow[indexOfTop].count += 1;
                 game.topRow[indexOfTop].symbols += symbolToUse;
                 board.boardRow4 = board.boardRow4.substring(0, indexPut) + symbolToUse + board.boardRow4.substring(indexPut + 1);
             }
         } else if (indexOfMid > -1 && game.middleRow[indexOfMid].count < 4) {
             if (game.middleRow[indexOfMid].symbols.indexOf(symbolToUse) == -1) {
-                var indexPut = parseInt(bet.type) + game.middleRow[indexOfMid].count + ((indexOfMid + 1) * 2);
+                let indexPut = parseInt(bet.type) + game.middleRow[indexOfMid].count + ((indexOfMid + 1) * 2);
                 game.middleRow[indexOfMid].count += 1;
                 game.middleRow[indexOfMid].symbols += symbolToUse;
                 board.boardRow8 = board.boardRow8.substring(0, indexPut) + symbolToUse + board.boardRow8.substring(indexPut + 1);
             }
         } else if (indexOfBot > -1 && game.bottomRow[indexOfBot].count < 4) {
             if (game.bottomRow[indexOfBot].symbols.indexOf(symbolToUse) == -1) {
-                var indexPut = parseInt(bet.type) + game.bottomRow[indexOfBot].count + ((indexOfBot + 1) * 2) + 1;
+                let indexPut = parseInt(bet.type) + game.bottomRow[indexOfBot].count + ((indexOfBot + 1) * 2) + 1;
                 game.bottomRow[indexOfBot].count += 1;
                 game.bottomRow[indexOfBot].symbols += symbolToUse;
                 board.boardRow12 = board.boardRow12.substring(0, indexPut) + symbolToUse + board.boardRow12.substring(indexPut + 1);
@@ -268,9 +278,9 @@ async function printBoard(force = false) {
 
 
 async function takeMoney() {
-    for (var i = 0; i < game.bets.length; i++) {
+    for (let i = 0; i < game.bets.length; i++) {
         let bet = game.bets[i]
-        var amount = bet.amount;
+        let amount = bet.amount;
         let user;
         if (bet.player in game.usersToUpdate) {
             user = game.usersToUpdate[bet.player]
@@ -284,8 +294,8 @@ async function takeMoney() {
 
 const giveMoney = (winners) => {
     winners.forEach(bet => {
-        var amount = bet.amount;
-        var type = bet.type;
+        let amount = bet.amount;
+        let type = bet.type;
 
         if (type == 'red' || type == 'black' || type == 'odd' || type == 'even' || type == '1-18' || type == '19-36') {
             game.usersToUpdate[bet.player].balance += amount * 2;
@@ -299,7 +309,7 @@ const giveMoney = (winners) => {
 
 
 const payoutWinners = () => {
-    var winners;
+    let winners;
     if (game.pickedNum.type == 'red') {
         winners = grabWinners('red');
         giveMoney(winners);
@@ -367,9 +377,7 @@ async function rollNumber() {
     await printBoard(true)
     await game.active_channel.send("Rolling a number now!")
     await takeMoney()
-    console.log("Took money")
-
-    var tempNum = Math.floor(Math.random() * 36);
+    let tempNum = Math.floor(Math.random() * 36);
     if (tempNum === 0) {
         game.pickedNum = {
             type: 'green',
@@ -391,17 +399,51 @@ async function rollNumber() {
         game.active_channel.send(`${tempNum} - Black`);
     }
 
-    console.log("Picked a number")
-
     payoutWinners()
-    console.log("Payed winners")
-    //TODO: Print leaderboard
-    let tempArray = Object.entries(game.usersToUpdate)
-    for (var i = 0; i < tempArray.length; i++) {
-        let user = tempArray[i]
-        db.updateUser(user[0], user[1])
-    }
-    console.log("Updated DB")
 
+
+
+    let send = '```\nPlayer       | Balance   | Profit\n====================================\n';
+	let toSend;
+	let playersFromHand = [];
+	game.bets.forEach(bet => {
+		playersFromHand.push(bet.player);
+	});
+    playersFromHand = playersFromHand.filter((x, i, a) => a.indexOf(x) == i); //Strip all duplicated players. Get a array of all players that competed
+	for (let i = 0; i < playersFromHand.length; i++) {
+        let player = playersFromHand[i]
+        let dbPlayer = await db.initUser(player)
+        let chatPlayer = game.active_channel.members.get(player)
+        let tempPlayer = game.usersToUpdate[player]
+
+        let profit = tempPlayer.balance - dbPlayer.balance
+
+        if (profit > 0) {
+            tempPlayer.wins += 1
+        } else {
+            tempPlayer.losses += 1
+        }
+
+		toSend = `${chatPlayer.nickname}(${dbPlayer.symbol})`
+		while(toSend.length < 13) {
+			toSend += ' ';
+		}
+		toSend += `|$${game.usersToUpdate[player].balance}`;
+		while(toSend.length < 25) {
+			toSend += ' ';
+		}
+		toSend += `|$${profit}\n`;
+		send += toSend;
+
+	}
+	game.active_channel.send(`${send}\`\`\``);
+
+
+
+    let tempArray = Object.entries(game.usersToUpdate)
+    for (let i = 0; i < tempArray.length; i++) {
+        let user = tempArray[i]
+        await db.updateUser(user[0], user[1])
+    }
     await resetGame()
 }
