@@ -9,6 +9,10 @@ This is just a meme, don't take this seriously
 - Mock Jacco
 - Water reminder
 - Binas memes
+### TODO:
+- Add command category
+- Add per command help
+
 
 ## Requirements
 
