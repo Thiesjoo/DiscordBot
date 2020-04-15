@@ -13,13 +13,5 @@ module.exports = {
     description: 'Heilige binas!',
     async execute(msg, args) {
         msg.channel.send(responses[Math.floor(Math.random() * responses.length)]);
-        // msg.guild.roles.fetch()
-        //     .then(roles => {
-        //         console.log(`There are ${roles.cache.size} roles.`)
-        //         msg.guild.roles.fetch(roles.cache[0]).then(test => {
-        //             console.log(test)
-        //         })
-        //     })
-        //     .catch(console.error);
     },
 };

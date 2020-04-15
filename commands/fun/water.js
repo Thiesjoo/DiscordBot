@@ -14,7 +14,7 @@ module.exports = {
             msg.channel.send("Water reminders turned off")
         } else {
             timeout = setInterval(x => {
-                console.log("Timer triggerd")
+                console.log("Water timer triggerd")
                 msg.channel.send("@everyone " +responses[Math.floor(Math.random() * responses.length)]);
             }, delay)
             msg.channel.send("There will be water reminders every 10 minutes from now on")

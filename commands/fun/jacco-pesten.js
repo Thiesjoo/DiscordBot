@@ -11,7 +11,8 @@ let responses = ["Jacco houd van Rachel(Uitgesproken als Ragel)",
     "nee",
     "ja",
     "cco",
-    "Flikker op"]
+    "Flikker op"
+]
 
 let jaccoId = "694164639709265930"
 

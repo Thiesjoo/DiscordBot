@@ -22,9 +22,9 @@ module.exports = [{
             );
             return
         }
-        if (!connection) {
+        // if (!connection) {
             connection = await voiceChannel.join();
-        }
+        // }
         connection.play(ytdl(urls[Math.floor(Math.random() * urls.length)])).on("finish", () => {
             voiceChannel.leave()
         })
@@ -42,6 +42,32 @@ module.exports = [{
             msg.reply("Not connected")
         }
     },
-}
-
+}, {
+        name: 'All-star',
+    alias: ["as"],
+    description: 'Play all star!',
+    async execute(msg, args) {
+        const voiceChannel = msg.member.voice.channel;
+        if (!voiceChannel) {
+            msg.channel.send(
+                "You need to be in a voice channel to play music!"
+            );
+            return
+        }
+        const permissions = voiceChannel.permissionsFor(msg.client.user);
+        if (!permissions.has("CONNECT") || !permissions.has("SPEAK")) {
+            msg.channel.send(
+                "I need the permissions to join and speak in your voice channel!"
+            );
+            return
+        }
+        // if (!connection) {
+            connection = await voiceChannel.join();
+        // }
+        connection.play(ytdl("https://www.youtube.com/watch?v=L_jWHffIx5E")).on("finish", () => {
+            voiceChannel.leave()
+        })
+        msg.channel.send("Playing all star")
+    },
+},
 ]

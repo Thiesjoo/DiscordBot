@@ -2,7 +2,7 @@ const db = require("../db")
 const conf = {
     minimumBetInside: 1000,  // Minimun Bet for single numbers
     minimumBetOutside: 1000, // Miniumun bet for <even, odd, ...>
-    duration: 100, // Duration in seconds of the game
+    duration: 50, // Duration in seconds of the game
     minTime: 2//Minium time between board-draws
 }
 
@@ -43,11 +43,8 @@ module.exports = [{
             msg.reply("Please provide 1 symbol.")
             return
         }
-
-        let user = await db.initUser(msg.author.id)
-        user.symbol = symbol
-        await db.updateUser(msg.author.id, user)
-        msg.reply("Updated your symbol!")
+        await db.updateSymbol(msg.author.id, symbol)
+        msg.reply(`Updated your symbol to: ${symbol}!`)
     },
 }, {
     name: 'finish-roulette',
@@ -70,27 +67,32 @@ module.exports = [{
             return
         }
         if (game.active && game.active.betting) {
-            let user = await db.initUser(msg.author.id)
+            // let user = await db.initUser(msg.author.id)
             let amount = 0
             let balanceToCheck = 0
-            if (msg.author.id in game.tempBalance) {
-                amount = db.processInput(args[0], game.tempBalance[msg.author.id])
+            if (msg.author.id in global.user_cache) {
+                if (global.user_cache[msg.author.id].game !== "roulette") {
+                    msg.reply("You are already active in another game!")
+                    return
+                }
+                amount = db.processInput(args[0], global.user_cache[msg.author.id].balance)
                 if (!amount) {
                     msg.reply("Please enter a valid amount of money")
                     return
                 }
-                balanceToCheck = game.tempBalance[msg.author.id]
+                balanceToCheck = global.user_cache[msg.author.id]
             } else {
-                amount = db.processInput(args[0], user.balance)
+                let balance = await db.getBalance(msg.author.id)
+                amount = db.processInput(args[0], balance)
                 if (!amount) {
                     msg.reply("Please enter a valid amount of money")
                     return
                 }
-                balanceToCheck = user.balance
-                game.tempBalance[msg.author.id] = user.balance
+                balanceToCheck = balance
+                global.user_cache[msg.author.id] = {balance, nickname: game.active_channel.members.get(msg.author.id).nickname, symbol: await db.getSymbol(msg.author.id), game: "roulette"}
             }
-            console.log(game.tempBalance)
-            if (!db.checkValid(amount, [1, balanceToCheck])) {
+
+            if (db.checkInvalid(amount, [1, balanceToCheck])) {
                 msg.reply("You dont have that money in your bank account. Usage: !bet <amount to bet> <number, red, black, even, odd, 1st, 2nd, 3rd, 1-18,19-36>")
                 return
             }
@@ -105,11 +107,10 @@ module.exports = [{
                     game.active_channel.send(`${bet.type}/${bet.amount} You have to bet at least $${conf.minimumBetOutside} for bets on groups.`);
                     return
                 } else {
-                    game.tempBalance[msg.author.id] -= bet.amount
+                    global.user_cache[msg.author.id].balance -= bet.amount
                     game.bets.push(bet);
                     msg.react("👍")
                     printBoard()
-
                 }
             } else if (/^\d+$/.test(bet.type)) {
                 if (parseInt(bet.type) < 37 && parseInt(bet.type) > -1) {
@@ -117,7 +118,7 @@ module.exports = [{
                         game.active_channel.send(`${bet.type}/${bet.amount} You have to bet at least $${conf.minimumBetInside} for bets on numbers.`);
                         return
                     } else {
-                        game.tempBalance[msg.author.id] -= bet.amount
+                        global.user_cache[msg.author.id].balance -= bet.amount
                         game.bets.push(bet);
                         msg.react("👍")
                         printBoard()
@@ -161,8 +162,6 @@ const resetGame = () => {
     game.bets = [];
     game.active = { game: false, betting: false, board: false }
     game.active_channel = null
-    game.tempBalance = {}
-    game.usersToUpdate = {}
     clearInterval(game.info)
     clearTimeout(game.time)
     resetRows();
@@ -182,7 +181,7 @@ async function printBoard(force = false) {
         let indexOfMid = game.idMapMid.indexOf(parseInt(bet.type));
         let indexOfBot = game.idMapBot.indexOf(parseInt(bet.type));
 
-        let user = await db.initUser(bet.player)
+        let user = global.user_cache[bet.player]
         let symbolToUse = user.symbol;
 
         if (bet.type == 'red' && game.redCount.number < 30 && game.redCount.symbols.indexOf(symbolToUse) == -1) {
@@ -276,33 +275,17 @@ async function printBoard(force = false) {
         board.boardRow16 + board.boardRow17 + board.boardRow18 + board.boardRow19 + board.boardRow20 + board.boardRow21 + board.boardRowFinal).then(message => globalBoardMessage = message).catch(console.error);
 }
 
-
-async function takeMoney() {
-    for (let i = 0; i < game.bets.length; i++) {
-        let bet = game.bets[i]
-        let amount = bet.amount;
-        let user;
-        if (bet.player in game.usersToUpdate) {
-            user = game.usersToUpdate[bet.player]
-        } else {
-            user = await db.initUser(bet.player)
-        }
-        user.balance -= amount
-        game.usersToUpdate[bet.player] = user
-    }
-}
-
 const giveMoney = (winners) => {
     winners.forEach(bet => {
         let amount = bet.amount;
         let type = bet.type;
 
         if (type == 'red' || type == 'black' || type == 'odd' || type == 'even' || type == '1-18' || type == '19-36') {
-            game.usersToUpdate[bet.player].balance += amount * 2;
+           global.user_cache[bet.player].balance += amount * 2;
         } else if (type == 'top' || type == 'mid' || type == 'bot' || type == '1st' || type == '2nd' || type == '3rd') {
-            game.usersToUpdate[bet.player].balance += amount * 3;
+           global.user_cache[bet.player].balance += amount * 3;
         } else {
-            game.usersToUpdate[bet.player].balance += amount * 36;
+           global.user_cache[bet.player].balance += amount * 36;
         }
     });
 }
@@ -376,7 +359,7 @@ async function rollNumber() {
     await game.active_channel.send("Final board! No more bets")
     await printBoard(true)
     await game.active_channel.send("Rolling a number now!")
-    await takeMoney()
+    // await takeMoney()
     let tempNum = Math.floor(Math.random() * 36);
     if (tempNum === 0) {
         game.pickedNum = {
@@ -410,40 +393,57 @@ async function rollNumber() {
 		playersFromHand.push(bet.player);
 	});
     playersFromHand = playersFromHand.filter((x, i, a) => a.indexOf(x) == i); //Strip all duplicated players. Get a array of all players that competed
+
+    //Alphabetically sort the players
+    playersFromHand.sort(function(a, b){
+        let chatPlayer_a = game.active_channel.members.get(a)
+        let chatPlayer_b = game.active_channel.members.get(b)
+
+        if(chatPlayer_a.nickname < chatPlayer_b.nickname) { return -1; }
+        if(chatPlayer_a.nickname > chatPlayer_b.nickname) { return 1; }
+        return 0;
+    })
+
+
 	for (let i = 0; i < playersFromHand.length; i++) {
         let player = playersFromHand[i]
         let dbPlayer = await db.initUser(player)
-        let chatPlayer = game.active_channel.members.get(player)
-        let tempPlayer = game.usersToUpdate[player]
+        let tempPlayer = global.user_cache[player]
 
         let profit = tempPlayer.balance - dbPlayer.balance
+        db.addBalance(player,profit)
 
         if (profit > 0) {
-            tempPlayer.wins += 1
+            db.addWin(player)
         } else {
-            tempPlayer.losses += 1
+            db.addLoss(player)
         }
 
-		toSend = `${chatPlayer.nickname}(${dbPlayer.symbol})`
+		toSend = `${tempPlayer.nickname}(${tempPlayer.symbol})`
 		while(toSend.length < 13) {
 			toSend += ' ';
 		}
-		toSend += `|$${game.usersToUpdate[player].balance}`;
+		toSend += `|$${tempPlayer.balance}`;
 		while(toSend.length < 25) {
 			toSend += ' ';
 		}
 		toSend += `|$${profit}\n`;
-		send += toSend;
-
+        send += toSend;
+        
+        delete global.user_cache[player]
 	}
 	game.active_channel.send(`${send}\`\`\``);
 
 
-
-    let tempArray = Object.entries(game.usersToUpdate)
-    for (let i = 0; i < tempArray.length; i++) {
-        let user = tempArray[i]
-        await db.updateUser(user[0], user[1])
-    }
+    // //Apply all actions to database
+    // let tempArray = Object.entries(global.user_cache)
+    // for (let i = 0; i < tempArray.length; i++) {
+    //     let user = tempArray[i]
+    //     if (user[1].game === "roulette") {
+    //         await 
+    //     }
+    //     user[1].balance = user[1].balance < 0 ? 0 : parseInt(user[1].balance)
+    //     await db.updateUser(user[0], user[1])
+    // }
     await resetGame()
 }
