@@ -1,9 +1,9 @@
 const db = require("../db")
 const conf = {
-    minimumBetInside: 1000,  // Minimun Bet for single numbers
+    minimumBetInside: 500,  // Minimun Bet for single numbers
     minimumBetOutside: 1000, // Miniumun bet for <even, odd, ...>
     duration: 50, // Duration in seconds of the game
-    minTime: 2//Minium time between board-draws
+    minTime: 10//Minium time between board-draws
 }
 
 const board = require("./board")

@@ -8,9 +8,9 @@ module.exports = [{
     async execute(msg, args) {
         let mention = msg.author.id
         if (args[0]) {
-            let mention = db.parseMention(args[0], msg)
+            mention = db.parseMention(args[0], msg)
             if (!mention) return
-        } 
+        }
 
         if (mention in global.user_cache) {
             let user = global.user_cache[mention]
@@ -19,6 +19,64 @@ module.exports = [{
             let balance = await db.getBalance(mention)
             msg.channel.send(`<@${mention}>'s balance is: $${balance} (Doesn't include money from active games)`);
         }
+    },
+}, {
+    name: 'add-money',
+    alias: ["test123"],
+    description: '(ADMIN POWER)',
+    async execute(msg, args) {
+        let mention = msg.author.id
+        if (args[0]) {
+            mention = db.parseMention(args[0], msg)
+            if (!mention) return
+        }
+
+        if (mention in global.user_cache) {
+            msg.reply("Jup gay")
+            // let user = global.user_cache[mention]
+            // msg.channel.send(`<@${mention}>'s balance is: $${user.balance}. He is currently betting in: ${user.game}`)
+        } else {
+            let balance = await db.addBalance(mention, 2000)
+            msg.channel.send(`<@${mention}>'s balance is: $${balance}`);
+        }
+    },
+},
+{
+    name: 'leaderboard',
+    alias: ["lb"],
+    description: 'Show the leaderboard. Usage: !lb <win, balance(standard)>',
+    async execute(msg, args) {
+        let results = [] //{id, stat}
+        let name = ""
+        if (!args[0]) {
+            args[0] = "balance"
+        }
+        if (args[0] == "balance") {
+            name = "Balance"
+            users = await db.getLeaderboard("balance")
+            results = users.map(x => {
+                return { id: msg.channel.members.get(x._id).nickname, stat: "$"+x.balance }
+            })
+        } else if (args[0] == "win") {
+            name = "Win/loss ratio"
+            users = await db.getLeaderboard("")
+            results = users.map(x => {
+                return { id: msg.channel.members.get(x._id).nickname, stat: (Math.round((x.wins/x.losses + Number.EPSILON) * 100) / 100)}
+            })
+            results.sort((a,b) => b.stat - a.stat)
+            results = results.map(x => {
+                return { id: x.id, stat: x.stat+"%" }
+            })
+        }else {
+            msg.reply("Not a valid argument")
+            return
+        }
+        let toSend = `Nickname - ${name}\n`
+        results.forEach(element => {
+            toSend += `${element.id} - ${element.stat}\n`
+        });
+        msg.channel.send(toSend)
+
     },
 },
 {
@@ -30,7 +88,8 @@ module.exports = [{
             return;
         }
 
-        let mention =  db.parseMention(args[0], msg)
+        //TODO: Make sure both accounts are initialized
+        let mention = db.parseMention(args[0], msg)
         if (!mention) return
 
         if (mention == msg.author.id) {
@@ -48,7 +107,7 @@ module.exports = [{
             return
         }
 
-        
+
         let user_balance = await db.getBalance(msg.author.id)
 
         const amount = db.processInput(args[1], user_balance)
@@ -57,8 +116,8 @@ module.exports = [{
             return
         }
 
-        user_balance = db.addBalance(msg.author.id,-amount)
-        let mention_user_balance  = db.addBalance(mention,amount)
+        user_balance = await db.addBalance(msg.author.id, -amount)
+        let mention_user_balance = await db.addBalance(mention, amount)
 
         msg.reply(`Successfully transfered $${amount}. Your balance is: $${user_balance} and <@${mention}> has $${mention_user_balance}`);
     },

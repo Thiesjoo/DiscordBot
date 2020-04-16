@@ -11,10 +11,15 @@ class User {
         this.balance = balance
         this.wins = 0
         this.losses = 0
-        this.symbol = "Q"
+        const currentUser = global.bot.users.cache.get(id)
+        if (currentUser) {
+            this.symbol = currentUser.username[0]
+        } else {
+            this.symbol = "Q"
+
+        }
     }
 }
-
 
 async function createUser(id) {
     let newUser = new User(id, startingBalance)
@@ -34,34 +39,32 @@ async function getUser(id) {
     }
 }
 
-// async function updateUser(id, newUser) {
-//     return users.update({ _id: id }, newUser)
-// }
-
 async function getBalance(id) {
     let user = await initUser(id)
+    console.log(user)
     return user.balance
 }
+
 async function getSymbol(id) {
     let user = await initUser(id)
     return user.symbol
 }
 
 async function updateSymbol(id, symbol) {
-    return users.update({_id: id}, { $set: { symbol } })
+    return users.update({ _id: id }, { $set: { symbol } })
 }
 
 async function addBalance(id, delta) {
-    let user = await users.update({_id: id}, { $inc: { balance:delta } }, {returnUpdatedDocs: true})
+    let user = await users.update({ _id: id }, { $inc: { balance: delta } }, { returnUpdatedDocs: true })
     return user.balance
 }
 
 async function addWin(id) {
-    return users.update({_id: id}, { $inc: { wins:1  } })
+    return users.update({ _id: id }, { $inc: { wins: 1 } })
 }
 
 async function addLoss(id) {
-    return users.update({_id: id}, { $inc: { losses:1  } })
+    return users.update({ _id: id }, { $inc: { losses: 1 } })
 }
 
 function parseMention(mention, msg) {
@@ -86,7 +89,7 @@ function parseMention(mention, msg) {
 
 async function processResult(id, result, channel) {
     //result : {delta: 100, gameType: "Coinflip", bet: 1000}
-    let balance = await addBalance(id,result.delta)
+    let balance = await addBalance(id, result.delta)
     if (result.delta > 0) {
         await addWin(id)
     } else {
@@ -109,7 +112,7 @@ async function processResult(id, result, channel) {
             ]
         }
     })
-}    
+}
 
 async function initUser(id) {
     let user = await getUser(id)
@@ -117,8 +120,12 @@ async function initUser(id) {
     return user
 }
 
+async function getLeaderboard(type,query=-1) {
+    return users.find({}).sort({[type]:query}).limit(5)
+}
+
 module.exports = {
-    initUser, parseMention, getSymbol,
+    initUser, parseMention, getSymbol,getLeaderboard,
 
     processInput(input, balance) {
         if (isNum(input)) {
@@ -141,9 +148,9 @@ module.exports = {
         if (amt > boundaries[1]) return true
         return false
     },
-    addLoss, addBalance, addWin, processResult,updateSymbol, getBalance
+    addLoss, addBalance, addWin, processResult, updateSymbol, getBalance
 }
 
-function isNum(num){
+function isNum(num) {
     return !isNaN(num)
-  }
+}
