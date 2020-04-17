@@ -434,16 +434,5 @@ async function rollNumber() {
 	}
 	game.active_channel.send(`${send}\`\`\``);
 
-
-    // //Apply all actions to database
-    // let tempArray = Object.entries(global.user_cache)
-    // for (let i = 0; i < tempArray.length; i++) {
-    //     let user = tempArray[i]
-    //     if (user[1].game === "roulette") {
-    //         await 
-    //     }
-    //     user[1].balance = user[1].balance < 0 ? 0 : parseInt(user[1].balance)
-    //     await db.updateUser(user[0], user[1])
-    // }
     await resetGame()
 }

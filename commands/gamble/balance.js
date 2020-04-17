@@ -21,9 +21,8 @@ module.exports = [{
         }
     },
 }, {
-    name: 'add-money',
-    alias: ["test123"],
-    description: '(ADMIN POWER)',
+    name: 'bailout',
+    description: 'If you have no money left, you can get $2k ',
     async execute(msg, args) {
         let mention = msg.author.id
         if (args[0]) {
@@ -31,10 +30,14 @@ module.exports = [{
             if (!mention) return
         }
 
+        let user = await db.getBalance(mention)
+        if (user !== 0) {
+            msg.reply("You have money left")
+            return
+        }
+
         if (mention in global.user_cache) {
-            msg.reply("Jup gay")
-            // let user = global.user_cache[mention]
-            // msg.channel.send(`<@${mention}>'s balance is: $${user.balance}. He is currently betting in: ${user.game}`)
+            msg.reply("You are currently betting, please finish the game first!")
         } else {
             let balance = await db.addBalance(mention, 2000)
             msg.channel.send(`<@${mention}>'s balance is: $${balance}`);
@@ -56,7 +59,7 @@ module.exports = [{
             users = await db.getLeaderboard("balance")
             results = users.map(x => {
                 return { id: msg.channel.members.get(x._id).nickname, stat: "$"+x.balance }
-            })
+            }) 
         } else if (args[0] == "win") {
             name = "Win/loss ratio"
             users = await db.getLeaderboard("")
@@ -64,21 +67,20 @@ module.exports = [{
                 return { id: msg.channel.members.get(x._id).nickname, stat: (Math.round((x.wins/x.losses + Number.EPSILON) * 100) / 100)}
             })
             results.sort((a,b) => b.stat - a.stat)
-            results = results.map(x => {
-                return { id: x.id, stat: x.stat+"%" }
-            })
         }else {
             msg.reply("Not a valid argument")
             return
         }
-        let toSend = `Nickname - ${name}\n`
-        results.forEach(element => {
-            toSend += `${element.id} - ${element.stat}\n`
+        let toSend = {	color: 0x0099ff,
+            fields: [],
+            title: `Leaderboard - ${name}`,}
+            const indexes = ["1st","2nd", "3rd", "4th", "5th"]
+        results.forEach((element,i) => {
+            toSend.fields.push( {name:`${indexes[i]} place`,value:`${element.id} - ${element.stat}`})
         });
-        msg.channel.send(toSend)
-
-    },
-},
+        msg.channel.send({embed: toSend})
+    }, 
+}, 
 {
     name: 'transfer',
     description: 'Transfer money to another person. Usage: !transfer @Person <amount>',
@@ -88,7 +90,6 @@ module.exports = [{
             return;
         }
 
-        //TODO: Make sure both accounts are initialized
         let mention = db.parseMention(args[0], msg)
         if (!mention) return
 
@@ -116,9 +117,15 @@ module.exports = [{
             return
         }
 
-        user_balance = await db.addBalance(msg.author.id, -amount)
         let mention_user_balance = await db.addBalance(mention, amount)
+        if (mention_user_balance)  {
+            
+            user_balance = await db.addBalance(msg.author.id, -amount)
 
         msg.reply(`Successfully transfered $${amount}. Your balance is: $${user_balance} and <@${mention}> has $${mention_user_balance}`);
+
+        } else {
+            msg.reply(`<@${mention}> has not initialized his account yet. No money was transferd`)
+        }
     },
 }]

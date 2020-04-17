@@ -41,7 +41,6 @@ async function getUser(id) {
 
 async function getBalance(id) {
     let user = await initUser(id)
-    console.log(user)
     return user.balance
 }
 
@@ -55,8 +54,9 @@ async function updateSymbol(id, symbol) {
 }
 
 async function addBalance(id, delta) {
-    let user = await users.update({ _id: id }, { $inc: { balance: delta } }, { returnUpdatedDocs: true })
-    return user.balance
+    let user = await users.update({ _id: id }, { $inc: { balance: delta } }, { returnUpdatedDocs: true, upsert: false })
+    if (user) return user.balance
+    return 0
 }
 
 async function addWin(id) {
