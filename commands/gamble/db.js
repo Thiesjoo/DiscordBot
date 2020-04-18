@@ -133,10 +133,9 @@ module.exports = {
             return amt
         } else {
             if (input.includes("%")) {
-                let percentage = "0." + input.slice(0, -1)
-                let float = parseFloat(percentage)
+                let float = parseFloat(input.slice(0, -1)/100)
                 if (float < 0 || float > 100) return 0
-                return parseInt(float * balance)
+                return Math.round(float * balance)
             } else if (input == "all") {
                 return balance
             }

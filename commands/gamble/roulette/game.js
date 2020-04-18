@@ -80,7 +80,7 @@ module.exports = [{
                     msg.reply("Please enter a valid amount of money")
                     return
                 }
-                balanceToCheck = global.user_cache[msg.author.id]
+                balanceToCheck = global.user_cache[msg.author.id].balance
             } else {
                 let balance = await db.getBalance(msg.author.id)
                 amount = db.processInput(args[0], balance)
@@ -91,7 +91,6 @@ module.exports = [{
                 balanceToCheck = balance
                 global.user_cache[msg.author.id] = {balance, nickname: game.active_channel.members.get(msg.author.id).nickname, symbol: await db.getSymbol(msg.author.id), game: "roulette"}
             }
-
             if (db.checkInvalid(amount, [1, balanceToCheck])) {
                 msg.reply("You dont have that money in your bank account. Usage: !bet <amount to bet> <number, red, black, even, odd, 1st, 2nd, 3rd, 1-18,19-36>")
                 return
