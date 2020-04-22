@@ -1,4 +1,4 @@
 module.exports = {
-    functions:[require("./purge"), require("./ping")],
+    functions:[require("./purge"), require("./ping"), ...require("./admin")],
     events: []
 }

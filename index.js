@@ -28,13 +28,31 @@ bot.login(TOKEN);
 bot.on('ready', () => {
     console.info(`Logged in as ${bot.user.tag}!`);
     bot.user.setPresence({
-        activity: { name: 'Rickle Pick', type: "WATCHING" }, status: 'online'
+        activity: { name: 'VALORANT', type: "PLAYING" }, status: 'online'
     })
 });
 
+
+
 bot.on('message', msg => {
     if (msg.author.bot) return;
-    if (msg.channel.name !== "gambling" && msg.channel.name !== "auswitz") return
+    if (msg.channel.name !== "gambling" && msg.channel.name !== "testing") return
+    if (!msg.guild) return;
+
+    // We don't want the bot to do anything further if it can't send msgs in the channel
+    if (msg.guild && !msg.channel.permissionsFor(msg.guild.me).missing('SEND_MESSAGES')) {
+        console.error("Cant send msgs")
+        return
+    };
+    const missing = msg.channel.permissionsFor(msg.guild.me).missing('MANAGE_MESSAGES');
+    // Here we check if the bot can actually add recations in the channel the command is being ran in
+    if (missing.includes('ADD_REACTIONS')) {
+        console.error("Cant add reactions")
+        return
+    }
+
+
+
 
     if (msg.content[0] == "!") {
         const temp = msg.content.substr(1)

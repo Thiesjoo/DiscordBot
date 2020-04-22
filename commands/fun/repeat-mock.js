@@ -1,7 +1,8 @@
-let repeat = false
-let allowed = "299983320815763456"
-let following = ""
+const db = require("../gamble/db")
+const admin_key = "299983320815763456"
 
+let repeat = false
+let following = ""
 
 module.exports = {
     activate: {
@@ -9,7 +10,7 @@ module.exports = {
         description: 'Mock someone by repeating their text. Usage: !activate-repeat @Ben',
         alias: ["ar", "a-r"],
         execute(msg, args) {
-            if (msg.author.id == allowed) {
+            if (msg.author.id == admin_key) {
                 let mention = db.parseMention(args[0], msg)
                 if (!mention) return
 
@@ -26,9 +27,9 @@ module.exports = {
         alias: ["tr", "t-r"],
         description: 'Enable/disable repeat',
         execute(msg, args) {
-            if (msg.author.id == allowed) {
+            if (msg.author.id == admin_key) {
                 repeat = !repeat
-                msg.channel.send('Toggled');
+                msg.channel.send(`Mocking is currently: ${repeat ? "enabled":"disabled"}`);
             }
         },
     },

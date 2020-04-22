@@ -2,13 +2,17 @@
 
 A simple discord bot which helps you meme Jacco.
 This is just a meme, don't take this seriously
+The bot only responds in ```gambling``` or ```testing```
 
 ## Features
 
+- Help message (!help)
 - Purge messages
 - Mock Jacco
 - Water reminder
 - Binas memes
+- Rick roll everybody in a voice channel
+
 ### TODO:
 - Add command category
 - Add per command help
@@ -18,6 +22,17 @@ This is just a meme, don't take this seriously
 
 - [Node](https://nodejs.org/en/)
 - [NPM](https://www.npmjs.com/)
+
+### Permissions
+*TEXT*
+- SEND_MESSAGES
+- MANAGE_MESSAGES
+- ADD_REACTIONS
+
+*VOICE*
+- CONNECT
+- SPEAK
+
 
 ## Getting started
 
