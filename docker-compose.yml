@@ -1,0 +1,12 @@
+version: '3'
+services:
+    th_discordbot_dev:
+        container_name: discordbot
+        # image: node:12-alpine
+        image: th_discordbot_dev
+        build: ./
+        volumes:
+            - ./:/opt/discordbot
+            - /opt/discordbot/node_modules
+        working_dir: /opt/discordbot
+        command: npm start

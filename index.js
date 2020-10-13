@@ -1,99 +1,33 @@
 require('dotenv').config();
 const Discord = require('discord.js');
 const bot = new Discord.Client();
-global.bot = bot
 bot.commands = {}
-const botCommands = require('./commands');
 
-let helpText = [{
-    name: "help, h",
-    value: "Display all commands"
-}]
 
-botCommands.functions.forEach(command => {
-    helpText.push({ name: `${command.name} ${(command.alias !== undefined) ? `(${command.alias.join(",")})` : ""}`, value: command.description })
-    bot.commands[command.name] = command
-})
+require("./messages/generateHelp")(bot)
+require("./messages/initCommands")(bot)
+require("./messages/initEvents")(bot)
+const processMessage = require('./messages/processMessage')(bot);
 
-botCommands.events.forEach(event => {
-    bot.on(event.name, msg => {
-        if (msg.author.bot) return;
-        event.execute(msg)
-    })
-})
 
 const TOKEN = process.env.TOKEN;
+if (!TOKEN) {
+    console.error("I need a token to function. Please provide token in the .env file, or passing it as a env variable. :)")
+    process.exit()
+}
 bot.login(TOKEN);
 
 bot.on('ready', () => {
     console.info(`Logged in as ${bot.user.tag}!`);
     bot.user.setPresence({
-        activity: { name: 'VALORANT', type: "PLAYING" }, status: 'online'
+        activity: { name: 'My developer coding me', type: "WATCHING" }, status: 'idle'
     })
 });
 
 
 
 bot.on('message', msg => {
-    if (msg.author.bot) return;
-    if (msg.channel.name !== "gambling" && msg.channel.name !== "testing") return
-    if (!msg.guild) return;
-
-    // We don't want the bot to do anything further if it can't send msgs in the channel
-    if (msg.guild && !msg.channel.permissionsFor(msg.guild.me).missing('SEND_MESSAGES')) {
-        console.error("Cant send msgs")
-        return
-    };
-    const missing = msg.channel.permissionsFor(msg.guild.me).missing('MANAGE_MESSAGES');
-    // Here we check if the bot can actually add recations in the channel the command is being ran in
-    if (missing.includes('ADD_REACTIONS')) {
-        console.error("Cant add reactions")
-        return
-    }
-
-
-
-
-    if (msg.content[0] == "!") {
-        const temp = msg.content.substr(1)
-        const args = temp.split(/ +/);
-        const command = args.shift().toLowerCase();
-        // console.info(`Called command: ${command}`);
-
-        if (command == "help" || command == "h") {
-            msg.channel.send({
-                embed: {
-                    color: 3447003,
-                    title: "Commands",
-                    fields: helpText
-                }
-            })
-            return
-        }
-
-
-        try {
-            if (!(command in bot.commands)) {
-                let alias = Object.values(bot.commands).find(x => {
-                    return x.alias &&  x.alias.includes(command)
-                })
-
-                if (alias) {
-                    alias.execute(msg,args)
-                } else {
-                    msg.reply("That command does not exist. Type !help for help")
-                }
-            } else {
-                bot.commands[command].execute(msg, args);
-            }
-
-
-
-        } catch (error) {
-            console.error(error);
-            msg.reply('there was an error trying to execute that command!');
-        }
-    }
+     processMessage(msg)
 });
 
 
