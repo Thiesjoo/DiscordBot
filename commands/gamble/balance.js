@@ -6,6 +6,7 @@ module.exports = [{
     alias: ["bal"],
     description: 'Balance check',
     async execute(msg, args) {
+        console.log(db)
         let mention = msg.author.id
         if (args[0]) {
             mention = db.parseMention(args[0], msg)

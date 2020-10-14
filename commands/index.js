@@ -1,4 +1,5 @@
 const { readdirSync } = require('fs')
+const config = require('../config/')
 const getDirectories = source =>
   readdirSync(source, { withFileTypes: true })
     .filter(dirent => dirent.isDirectory())
@@ -7,7 +8,7 @@ const getDirectories = source =>
 
 let functions = []
 let events = []
-const dirs = getDirectories("./commands")
+const dirs = getDirectories(config.commandDir)
 
 dirs.forEach(item => {
   let module = require(`./${item}`)

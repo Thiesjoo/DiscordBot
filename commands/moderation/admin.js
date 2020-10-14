@@ -1,20 +1,20 @@
-const admin_key = "299983320815763456"
+const config = require("../../config")
 
 module.exports = [{
     name: 'not-add-role',
     alias: ["ad"],
     description: 'This doesnt add a role',
     async execute(msg, args) {
-        if (msg.author.id !== admin_key) return
-        const roles  =msg.guild.roles.cache
+        if (msg.author.id !== config.adminUser) return
+        const roles = msg.guild.roles.cache
 
         const result = roles.find((value) => value.name.includes(args[0]))
         if (!result) {
             msg.reply("Role not found")
             return
         }
-        
-        if (args[0] && args[1]){
+
+        if (args[0] && args[1]) {
             //Role and mention
             const user = msg.mentions.users.first();
             const member = msg.guild.member(user)
@@ -27,21 +27,21 @@ module.exports = [{
             console.log("Wut")
         }
     },
-},{
+}, {
     name: 'add-role',
     alias: ["rd"],
     description: 'This doesnt add a role',
     async execute(msg, args) {
-        if (msg.author.id !== admin_key) return
-        const roles  = msg.guild.roles.cache
-        // roles.sort((a,b) => a.rawPosition-b.rawPosition)
+        if (msg.author.id !== config.adminUser) return
+
+        const roles = msg.guild.roles.cache
         const result = roles.find((value) => value.name.includes(args[0]))
         if (!result) {
             msg.reply("Role not found")
             return
         }
-        
-        if (args[0] && args[1]){
+
+        if (args[0] && args[1]) {
             //Role and mention
             const user = msg.mentions.users.first();
             const member = msg.guild.member(user)
@@ -53,4 +53,5 @@ module.exports = [{
         } else {
             console.log("Wut")
         }
-    }}]
+    }
+}]

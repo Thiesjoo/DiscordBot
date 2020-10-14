@@ -66,6 +66,7 @@ module.exports = [{
             msg.reply("Invalid command. Usage: !bet <amount to bet> <number, red, black, even, odd, 1st, 2nd, 3rd, 1-18,19-36>")
             return
         }
+    
         if (game.active && game.active.betting) {
             // let user = await db.initUser(msg.author.id)
             let amount = 0
@@ -89,7 +90,11 @@ module.exports = [{
                     return
                 }
                 balanceToCheck = balance
-                global.user_cache[msg.author.id] = {balance, nickname: game.active_channel.members.get(msg.author.id).nickname, symbol: await db.getSymbol(msg.author.id), game: "roulette"}
+console.log(msg.author)   
+             const user = game.active_channel.members.get(msg.author.id);
+             let test = user.nickname
+             if (!test) test = msg.author.username
+                global.user_cache[msg.author.id] = {balance, nickname: test, symbol: await db.getSymbol(msg.author.id), game: "roulette"}
             }
             if (db.checkInvalid(amount, [1, balanceToCheck])) {
                 msg.reply("You dont have that money in your bank account. Usage: !bet <amount to bet> <number, red, black, even, odd, 1st, 2nd, 3rd, 1-18,19-36>")
@@ -395,11 +400,14 @@ async function rollNumber() {
 
     //Alphabetically sort the players
     playersFromHand.sort(function(a, b){
-        let chatPlayer_a = game.active_channel.members.get(a)
-        let chatPlayer_b = game.active_channel.members.get(b)
+        let chatPlayerA = game.active_channel.members.get(a)
+        let chatPlayerB = game.active_channel.members.get(b)
 
-        if(chatPlayer_a.nickname < chatPlayer_b.nickname) { return -1; }
-        if(chatPlayer_a.nickname > chatPlayer_b.nickname) { return 1; }
+        let nameA = chatPlayerA.displayName;
+        let nameB = chatPlayerB.displayName 
+
+        if(nameA < nameB) { return -1; }
+        if(nameA > nameB) { return 1; }
         return 0;
     })
 

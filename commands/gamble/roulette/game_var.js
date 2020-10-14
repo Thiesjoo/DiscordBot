@@ -38,7 +38,6 @@ game.secondCount = { number: 24, symbols: '' };
 game.thirdCount = { number: 44, symbols: '' };
 
 game.active = {game: false, betting: false, board: false}
-game.tempBalance = {}
 game.active_channel = null
 game.lastDraw = new Date()
 game.usersToUpdate = {}

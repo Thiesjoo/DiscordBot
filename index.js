@@ -3,6 +3,8 @@ const Discord = require('discord.js');
 const bot = new Discord.Client();
 bot.commands = {}
 
+global.bot = bot //Only for gamble commands
+//FIXME: Remove this
 
 require("./messages/generateHelp")(bot)
 require("./messages/initCommands")(bot)

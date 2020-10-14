@@ -13,4 +13,5 @@ module.exports = function (bot) {
     botCommands.functions.forEach(command => {
         helpText.push({ name: `${command.name} ${(command.alias !== undefined) ? `(${command.alias.join(",")})` : ""}`, value: command.description })
     })
+    bot.helpText = helpText
 }

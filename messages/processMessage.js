@@ -1,9 +1,9 @@
+const config = require("../config");
+
 module.exports = (bot) => {
-
-
     return function (msg) {
         if (msg.author.bot) return;
-        if (msg.channel.name !== "gambling" && msg.channel.name !== "testing") return
+        if (!config.globalChannels.includes(msg.channel.name)) return
         if (!msg.guild) return;
 
         const myPerms = msg.channel.permissionsFor(msg.guild.me)
@@ -29,14 +29,13 @@ module.exports = (bot) => {
             const temp = msg.content.substr(1)
             const args = temp.split(/ +/);
             const command = args.shift().toLowerCase();
-            // console.info(`Called command: ${command}`);
 
             if (command == "help" || command == "h") {
                 msg.channel.send({
                     embed: {
                         color: 3447003,
                         title: "Commands",
-                        fields: helpText
+                        fields: bot.helpText
                     }
                 })
                 return
