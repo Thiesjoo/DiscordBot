@@ -2,7 +2,6 @@
 
 A simple discord bot which helps you meme Jacco.
 This is just a meme, don't take this seriously
-The bot only responds in ```gambling``` or ```testing```
 
 ## Features
 
@@ -14,9 +13,7 @@ The bot only responds in ```gambling``` or ```testing```
 - Rick roll everybody in a voice channel
 
 ### TODO:
-- Add command category
-- Add per command help
-
+- Add a mongodb database
 
 ## Requirements
 
@@ -24,6 +21,7 @@ The bot only responds in ```gambling``` or ```testing```
 - [NPM](https://www.npmjs.com/)
 
 ### Permissions
+The bot checks some permissions to function correctly
 *TEXT*
 - SEND_MESSAGES
 - MANAGE_MESSAGES
@@ -35,8 +33,13 @@ The bot only responds in ```gambling``` or ```testing```
 
 
 ## Getting started
-
 First make sure you have all the required tools installed on your local machine then continue with these steps.
+
+You need:
+* Git
+* Docker
+* Docker-compose
+* A discord bot token. (You can acquire one at: [Discord Developer Portal](https://discordapp.com/developers/applications/))
 
 ### Installation
 
@@ -47,23 +50,23 @@ git clone https://github.com/Thiesjoo/DiscordBot
 # Enter into the directory
 cd discordbot/
 
-# Install the dependencies
-npm install
+# If you want to work on the app while it's running, you have to start a docker compose container with: (Make sure you provide a token in the .env file)
+docker-compose up --build
+
+# If you want to build an image and run the image run:
+docker build . -t th_discordbot_dev
+docker build . -f Dockerfile.total -t th_discordbot
+
+docker run --env TOKEN="<your token here>" th_discordbot
+
 ```
 
-### Configuration
 
-After cloning the project and installing all dependencies you need to add your Discord API token in the ```.env.sample``` file
-Then you need to rename the file to ```.env```
+## Customization
+In the ```config/index.js``` file you will find some configuration options
 
-### Starting the application
-
-```bash
-node index.js
-```
 
 ## Author
-
 Thies Nieborg
 
 ## License

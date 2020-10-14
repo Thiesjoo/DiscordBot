@@ -32,7 +32,7 @@ bot.on('message', msg => {
      processMessage(msg)
 });
 
-
+//Exit handeling
 process.stdin.resume();//so the program will not close instantly
 
 function exitHandler(options, exitCode) {
