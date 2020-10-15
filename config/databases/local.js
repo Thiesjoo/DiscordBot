@@ -1,5 +1,5 @@
 const Datastore = require('nedb-promises');
-const config = require('../../../config');
+const config = require('../');
 
 const users = new Datastore({ filename: config.databaseURL, autoload: true });
 const startingBalance = 20000
@@ -67,25 +67,7 @@ async function addLoss(id) {
     return users.update({ _id: id }, { $inc: { losses: 1 } })
 }
 
-function parseMention(mention, msg) {
-    if (!mention) {
-        msg.reply("You have to mention someone in the first argument")
-        return false
-    }
-    if (mention.startsWith('<@') && mention.endsWith('>')) {
-        mention = mention.slice(2, -1);
-        if (mention.startsWith('!')) {
-            mention = mention.slice(1);
-        } else if (mention.startsWith("&")) {
-            msg.reply("You can't mention roles")
-            return false
-        }
-    } else {
-        msg.reply("Invalid mention")
-        return false
-    }
-    return mention
-}
+
 
 async function processResult(id, result, channel) {
     //result : {delta: 100, gameType: "Coinflip", bet: 1000}
@@ -115,8 +97,10 @@ async function processResult(id, result, channel) {
 }
 
 async function initUser(id) {
+    // throw new Error("test")
     let user = await getUser(id)
     if (!user) user = await createUser(id)
+    
     return user
 }
 
@@ -125,7 +109,7 @@ async function getLeaderboard(type,query=-1) {
 }
 
 module.exports = {
-    initUser, parseMention, getSymbol,getLeaderboard,
+    initUser, getSymbol,getLeaderboard,
 
     processInput(input, balance) {
         if (isNum(input)) {
@@ -147,7 +131,10 @@ module.exports = {
         if (amt > boundaries[1]) return true
         return false
     },
-    addLoss, addBalance, addWin, processResult, updateSymbol, getBalance
+    addLoss, addBalance, addWin, processResult, updateSymbol, getBalance,
+
+    //HACKED:
+    parseMention: require("../../messages/helper")
 }
 
 function isNum(num) {

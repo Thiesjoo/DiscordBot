@@ -10,7 +10,7 @@ const responses = [
 
 module.exports = {
     name: 'binas',
-    description: 'Heilige binas!',
+    description: 'Holy binas! (Binas is a school book that helps you with Physics, chemistry and biology.)',
     async execute(msg, args) {
         msg.channel.send(responses[Math.floor(Math.random() * responses.length)]);
     },

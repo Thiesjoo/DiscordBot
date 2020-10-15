@@ -2,7 +2,7 @@ const config = require("../../config");
 
 let water = false
 
-const responses = ["Neem een slokje water!","Tijd om wat te drinken", "Stay hydrated!", "Bish go hydrate yourself", "Time for a sip", "Neem een slokje", "Tijd voor water", "DRINK WATER GODVERDOMME"]
+const responses = ["Take a sip!", "Stay hydrated!", "Bish go hydrate yourself", "Drink some water!", ]
 let timeout
 let delay = config.waterDelay //10 minutes 
 

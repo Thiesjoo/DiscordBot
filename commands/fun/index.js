@@ -6,6 +6,6 @@ const rrFunctions = rr.functions;
 const rrEvents = rr.events
 
 module.exports = {
-    functions: [require("./binas"),require('./jacco-pesten'), repeater.toggle, repeater.activate, require("./water"), require("./stink"), ...rrFunctions],
+    functions: [require("./binas"), repeater.toggle, repeater.activate, require("./water"), ...rrFunctions],
     events: [repeater.event, ...rrEvents]
 }

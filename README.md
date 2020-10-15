@@ -7,13 +7,15 @@ This is just a meme, don't take this seriously
 
 - Help message (!help)
 - Purge messages
-- Mock Jacco
 - Water reminder
 - Binas memes
 - Rick roll everybody in a voice channel
 
 ### TODO:
 - Add a mongodb database
+- Add redis for caching things like: user following, game status, 
+- Admin role
+
 
 ## Requirements
 
@@ -64,6 +66,26 @@ docker run --env TOKEN="<your token here>" th_discordbot
 
 ## Customization
 In the ```config/index.js``` file you will find some configuration options
+
+
+## Redis naming
+
+During games users and their balance are stored in the redis cache
+```disc:user:<user id> = {data}```
+Data will be something like this:
+```js
+{
+    _id: id,
+    symbol: "<symbol of user>",
+    balance: "<balance of user>"
+}
+```
+The rest of the data is not needed while in a game, and isn't accessed often.
+
+
+
+Roulette game stores your bets
+```disc:roulette:user:<user id>```
 
 
 ## Author

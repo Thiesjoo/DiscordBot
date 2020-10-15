@@ -1,12 +1,12 @@
 const config = require("../../config");
-const db = require("../gamble/db")
+const db = require("../../config/db")
 let repeat = false
 let following = ""
 
 module.exports = {
     activate: {
         name: 'activate-repeat',
-        description: 'Mock someone by repeating their text. Usage: !activate-repeat @Ben',
+        description: 'Mock someone by repeating their text. Usage: !activate-repeat @<user>',
         alias: ["ar", "a-r"],
         execute(msg, args) {
             if (msg.author.id == config.adminUser) {

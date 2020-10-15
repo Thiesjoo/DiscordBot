@@ -1,7 +1,7 @@
 {
   "name": "bi-nasi",
   "version": "1.0.0",
-  "description": "",
+  "description": "Discord bot for me and my friends!",
   "main": "index.js",
   "scripts": {
     "start": "nodemon .",
@@ -13,9 +13,11 @@
   "license": "MIT",
   "dependencies": {
     "@discordjs/opus": "^0.3.2",
+    "async-redis": "^1.1.7",
     "discord.js": "^12.3.1",
     "dotenv": "^8.2.0",
     "ffmpeg-static": "^4.2.7",
+    "mongodb": "^3.6.2",
     "nedb-promises": "^4.1.0",
     "nodemon": "^2.0.5",
     "ytdl-core-discord": "^1.2.3"

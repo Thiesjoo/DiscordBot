@@ -1,7 +1,7 @@
 const config = require("../config");
 
 module.exports = (bot) => {
-    return function (msg) {
+    return async function (msg) {
         if (msg.author.bot) return;
         if (!config.globalChannels.includes(msg.channel.name)) return
         if (!msg.guild) return;
@@ -14,7 +14,7 @@ module.exports = (bot) => {
             return
         };
 
-       // Here we check if the bot can actually add reactions in the channel the command is being ran in
+        // Here we check if the bot can actually add reactions in the channel the command is being ran in
         if (myPerms.missing('ADD_REACTIONS').length > 0) {
             console.error("Cannot add reactions in this channel: ", msg.channel)
             return
@@ -49,19 +49,16 @@ module.exports = (bot) => {
                     })
 
                     if (alias) {
-                        alias.execute(msg, args)
+                        await alias.execute(msg, args)
                     } else {
                         msg.reply("That command does not exist. Type !help for help")
                     }
                 } else {
-                    bot.commands[command].execute(msg, args);
+                    await bot.commands[command].execute(msg, args);
                 }
-
-
-
             } catch (error) {
                 console.error(error);
-                msg.reply('there was an error trying to execute that command!');
+                msg.reply('There was an error trying to execute something with that command!');
             }
         }
     }

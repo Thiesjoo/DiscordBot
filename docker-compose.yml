@@ -1,7 +1,7 @@
 version: '3'
 services:
     th_discordbot_dev:
-        container_name: discordbot
+        container_name: discordbot_dev
         # image: node:12-alpine
         image: th_discordbot_dev
         build: ./
@@ -10,3 +10,11 @@ services:
             - /opt/discordbot/node_modules
         working_dir: /opt/discordbot
         command: npm start
+
+    redis:
+        container_name: redis_dev
+        image: redis
+
+    mongo:
+        container_name:  mongo_dev
+        image: mongo

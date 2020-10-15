@@ -1,9 +1,9 @@
 const config = require("../../config")
 
 module.exports = [{
-    name: 'not-add-role',
+    name: 'add-role',
     alias: ["ad"],
-    description: 'This doesnt add a role',
+    description: 'Add role to a user that is mentioned. (ADMIN)',
     async execute(msg, args) {
         if (msg.author.id !== config.adminUser) return
         const roles = msg.guild.roles.cache
@@ -28,9 +28,9 @@ module.exports = [{
         }
     },
 }, {
-    name: 'add-role',
+    name: 'remove-role',
     alias: ["rd"],
-    description: 'This doesnt add a role',
+    description: 'Remove a role from a user that is mentioned. (ADMIN)',
     async execute(msg, args) {
         if (msg.author.id !== config.adminUser) return
 

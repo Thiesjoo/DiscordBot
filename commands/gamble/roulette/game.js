@@ -1,4 +1,4 @@
-const db = require("../db")
+const db = require("../../../config/db")
 const conf = {
     minimumBetInside: 500,  // Minimun Bet for single numbers
     minimumBetOutside: 1000, // Miniumun bet for <even, odd, ...>
