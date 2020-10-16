@@ -14,7 +14,11 @@ services:
     redis:
         container_name: redis_dev
         image: redis
+        logging:
+            driver: none
 
     mongo:
         container_name:  mongo_dev
         image: mongo
+        logging:
+            driver: none

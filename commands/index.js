@@ -11,6 +11,7 @@ let events = []
 const dirs = getDirectories(config.commandDir)
 
 dirs.forEach(item => {
+  if (item.includes("_OLD")) return
   let module = require(`./${item}`)
   functions = [...functions, ...module.functions]
   events = [...events, ...module.events]

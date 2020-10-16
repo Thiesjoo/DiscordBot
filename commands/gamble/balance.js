@@ -1,49 +1,45 @@
 const db = require("../../config/db")
 const redis = require("../../config/redisPUB")
-
+const { parseMsgMention, parseMention } = require("../../messages/helper")
+const { inputToNumber, amountInBoundary } = require("./gambleHelper")
 
 module.exports = [{
     name: 'balance',
     alias: ["bal"],
     description: 'Balance check',
     async execute(msg, args) {
-        console.log(db)
-        let mention = msg.author.id
-        if (args[0]) {
-            mention = db.parseMention(args[0], msg)
-            if (!mention) return
-        }
+        let mention = parseMsgMention(msg, args)
+        let user = await db.getUser(mention)
 
-        if (mention in global.user_cache) {
-            let user = global.user_cache[mention]
-            msg.channel.send(`<@${mention}>'s balance is: $${user.balance}. He is currently betting in: ${user.game}`)
-        } else {
-            let balance = await db.getBalance(mention)
-            msg.channel.send(`<@${mention}>'s balance is: $${balance} (Doesn't include money from active games)`);
-        }
+        msg.channel.send(`<@${mention}>'s balance is: $${user.balance}`)
     },
 }, {
     name: 'bailout',
     description: 'If you have no money left, you can get free dollars ($2k) ',
     async execute(msg, args) {
-        let mention = msg.author.id
-        if (args[0]) {
-            mention = db.parseMention(args[0], msg)
-            if (!mention) return
-        }
+        let mention = parseMsgMention(msg, args)
+        let user = await db.getUser(mention)
 
-        let user = await db.getBalance(mention)
-        if (user !== 0) {
-            msg.reply("You have money left")
+        if (user.balance > 0) {
+            msg.reply("You still have money left.")
             return
         }
 
-        if (mention in global.user_cache) {
-            msg.reply("You are currently betting, please finish the game first!")
+        if (user.cached && user.ingame) {
+
         } else {
-            let balance = await db.addBalance(mention, 2000)
-            msg.channel.send(`<@${mention}>'s balance is: $${balance}`);
+            user = await db.addBalance(mention, 2000)
+            msg.channel.send(`<@${mention}>'s balance is: $${user.balance}`);
         }
+
+        // if ()
+
+        // if (mention in global.user_cache) {
+        //     msg.reply("You are currently betting, please finish the game first!")
+        // } else {
+        //     let balance = await db.addBalance(mention, 2000)
+        //     msg.channel.send(`<@${mention}>'s balance is: $${balance}`);
+        // }
     },
 },
 {
@@ -51,36 +47,38 @@ module.exports = [{
     alias: ["lb"],
     description: 'Show the leaderboard. Usage: !lb <win, balance(standard)>',
     async execute(msg, args) {
-        let results = [] //{id, stat}
+        let results = [] //{name, stat}
         let name = ""
-        if (!args[0]) {
-            args[0] = "balance"
-        }
+        if (!args[0]) args[0] = "balance" //Default to balance leaderboard
+
+
         if (args[0] == "balance") {
             name = "Balance"
             users = await db.getLeaderboard("balance")
+            console.log(users)
             results = users.map(x => {
-                return { id: msg.channel.members.get(x._id).nickname, stat: "$" + x.balance }
+                return { name: x.name, stat: "$" + x.balance }
             })
         } else if (args[0] == "win") {
             name = "Win/loss ratio"
             users = await db.getLeaderboard("")
             results = users.map(x => {
-                return { id: msg.channel.members.get(x._id).nickname, stat: (Math.round((x.wins / x.losses + Number.EPSILON) * 100) / 100) }
+                return { name: x.name, stat: (Math.round((x.wins / x.losses + Number.EPSILON) * 100) / 100) }
             })
             results.sort((a, b) => b.stat - a.stat)
         } else {
             msg.reply("Not a valid argument")
             return
         }
+
         let toSend = {
             color: 0x0099ff,
             fields: [],
             title: `Leaderboard - ${name}`,
         }
         const indexes = ["1st", "2nd", "3rd", "4th", "5th"]
-        results.forEach((element, i) => {
-            toSend.fields.push({ name: `${indexes[i]} place`, value: `${element.id} - ${element.stat}` })
+        results.forEach((player, i) => {
+            toSend.fields.push({ name: `${indexes[i]} place`, value: `${player.name} - ${player.stat}` })
         });
         msg.channel.send({ embed: toSend })
     },
@@ -94,7 +92,7 @@ module.exports = [{
             return;
         }
 
-        let mention = db.parseMention(args[0], msg)
+        let mention = parseMention(args[0], msg)
         if (!mention) return
 
         if (mention == msg.author.id) {
@@ -102,32 +100,29 @@ module.exports = [{
             return
         }
 
+        let user1 = await db.getUser(msg.author.id);
+        let user2 = await db.getUser(mention)
 
-        if (msg.author.id in global.user_cache) {
+        if (user1.cached && user1.ingame) {
             msg.reply("You are currently participating in a game. You can't transfer money right now")
             return
         }
-        if (mention in global.user_cache) {
+        if (user2.cached && user2.ingame) {
             msg.reply("The person you tried transferring money to is currently participating in a game. You can't transfer money right now")
             return
         }
 
 
-        let user_balance = await db.getBalance(msg.author.id)
-
-        const amount = db.processInput(args[1], user_balance)
-        if (db.checkInvalid(amount, [0, user_balance])) {
+        const amount = inputToNumber(args[1], user1.balance)
+        if (amountInBoundary(amount, [0, user1.balance])) {
             msg.reply("Please provide a valid amount. Usage: !transfer @Person <amount>")
             return
         }
 
-        let mention_user_balance = await db.addBalance(mention, amount)
-        if (mention_user_balance) {
-
-            user_balance = await db.addBalance(msg.author.id, -amount)
-
-            msg.reply(`Successfully transfered $${amount}. Your balance is: $${user_balance} and <@${mention}> has $${mention_user_balance}`);
-
+        let newUser2 = await db.addBalance(mention, amount)
+        if (newUser2) {
+            let newUser1 = await db.addBalance(msg.author.id, -amount)
+            msg.reply(`Successfully transfered $${amount}. Your balance is: $${newUser1.balance} and <@${mention}> has $${newUser2.balance}`);
         } else {
             msg.reply(`<@${mention}> has not initialized his account yet. No money was transferred`)
         }

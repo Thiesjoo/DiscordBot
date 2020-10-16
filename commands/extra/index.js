@@ -5,12 +5,12 @@ module.exports = {
     events: [
         {
             name: "messageUpdate",
-            execute: (msgOld, msgNew, bot) => {
-                if (msgNew.author.bot || msgNew.deleted || msgNew.pinned) return
+            execute: async (msgOld, msgNew, bot) => {
+                if (msgNew.author.bot) return
                 
                 //Check if old message was processed
-                console.log("MSG EDITED", msgNew)
-                processMessage(bot)(msgNew)
+                console.log("MSG EDITED")
+                await processMessage(bot)(msgNew)
             }
         }
     ]

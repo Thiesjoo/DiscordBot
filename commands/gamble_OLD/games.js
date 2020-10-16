@@ -1,4 +1,3 @@
-const { inputToNumber, amountInBoundary, processResult  } = require("./gambleHelper")
 const db = require("../../config/db")
 
 module.exports = [
@@ -6,17 +5,14 @@ module.exports = [
         name: "flip",
         description: "Do a coin flip for money.",
         async execute(msg, args) {
-
-            // let mention = parseMsgMention(msg, args)
-            let user = await db.getUser(msg.author.id)
-    
-            if (user.cached && user.ingame) {
+            if (msg.author.id in global.user_cache) {
                 msg.reply("You are already participating in a game. Can't flip now")
                 return
             }
 
-            const amount = inputToNumber(args[0], user.balance)
-            if (amountInBoundary(amount, [0, user.balance])) {
+            let balance = await db.getBalance(msg.author.id)
+            const amount = db.processInput(args[0], balance)
+            if (db.checkInvalid(amount, [0, balance])) {
                 msg.reply("Please provide a valid amount. Usage: !flip <amount>")
                 return
             }
@@ -24,8 +20,8 @@ module.exports = [
             const result = Math.random()
             let final_result = { gameType: "Coinflip", bet: amount }
             final_result.delta = result > 0.5 ? -amount : amount
-            await processResult(msg.author.id, final_result, msg.channel, db)
+            db.processResult(msg.author.id, final_result, msg.channel)
         }
     },
-    // ...require("./roulette/game")
+    ...require("./roulette/game")
 ]

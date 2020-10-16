@@ -1,3 +1,4 @@
+// Get the user that is mentioned
 function parseMention(mention, msg) {
     if (!mention) {
         msg.reply("You have to mention someone in the first argument")
@@ -18,6 +19,7 @@ function parseMention(mention, msg) {
     return mention
 }
  
+//Check if argument is given, and then parse mention
 function parseMsgMention(msg, args) {
     let mention = msg.author.id
     if (args[0]) {
@@ -28,12 +30,29 @@ function parseMsgMention(msg, args) {
 }
 
 
+function isNum(num) {
+    return !isNaN(num)
+}
+
 function isAdmin(user) {
     return false
 }
 
-function getName(user) {
-
+async function getName(mention, msg) {
+    let guildmember = await msg.guild.members.fetch(mention);
+    let name = guildmember.nickname
+    if(!name) name = guildmember.user.username
+    return name
 }
 
-module.exports = { parseMention, parseMsgMention, isAdmin, getName }
+module.exports = { 
+    parseMention, parseMsgMention, 
+    
+    isAdmin, 
+    
+    //User stuff
+    getName,
+
+    //Validation
+    isNum,
+}

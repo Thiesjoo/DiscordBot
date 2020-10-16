@@ -57,8 +57,13 @@ module.exports = (bot) => {
                     await bot.commands[command].execute(msg, args);
                 }
             } catch (error) {
-                console.error(error);
-                msg.reply('There was an error trying to execute something with that command!');
+                if (error.message == "User not found") {
+                    msg.reply("That user doesn't exist, or doesn't have an account with this bot yet.")
+                } else {
+
+                    console.error(error);
+                    msg.reply('There was an error trying to execute something with that command!');
+                }
             }
         }
     }

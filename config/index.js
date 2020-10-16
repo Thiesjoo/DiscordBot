@@ -1,6 +1,8 @@
 module.exports = {
-    databaseType: "local", // Only 'local' is currently supported
-    databaseURL: "db/users.db", //Url to mongodb database or file location for local
+    databaseType: "mongo", // Only 'local' is currently supported
+    // databaseURL: "db/users.db", //Url to mongodb database or file location for local
+    databaseURL: "mongodb://mongo:27017",
+
 
     redisURL: "redis://redis",
 

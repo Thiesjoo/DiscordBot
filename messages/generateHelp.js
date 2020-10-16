@@ -7,6 +7,7 @@ module.exports = function (bot) {
     }]
 
     botCommands.functions.forEach(command => {
+        if (command.admin) return
         helpText.push({ name: `${command.name} ${(command.alias !== undefined) ? `(${command.alias.join(",")})` : ""}`, value: command.description })
     })
     
