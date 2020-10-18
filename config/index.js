@@ -15,12 +15,19 @@ module.exports = {
     globalChannels: ["testing", "gambling"], // Channels that the bot is active in
 
 
-    ready: {"redis": 0, "database": 0, "discord": 0}, //0 is working, 1 is active, -1 is broken
+    ready: { "redis": 0, "database": 0, "discord": 0 }, //0 is working, 1 is active, -1 is broken
     //Redis is important for the internal messaging system and database caching
     //Database stores all the data about users and guilds,
     //Discord is the main bot integration
 
-    statusIcons: {"-1": "🔴", 0: "🟡", 1: "🟢"},
+    statusIcons: { "-1": "🔴", 0: "🟡", 1: "🟢" },
 
     userExpiry: 60, // How long to store users for in the redis cache (Minutes)
+
+    roulette: { //Settings for roulette game
+        minimumBetInside: 500,  // Minimum Bet for single numbers
+        minimumBetOutside: 1000, // Minimum bet for <even, odd, ...>
+        duration: 50, // Duration in seconds of the game
+        minTime: 10//Minium time between board-draws
+    },
 }

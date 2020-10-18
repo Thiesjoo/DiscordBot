@@ -27,5 +27,5 @@ module.exports = [
             await processResult(msg.author.id, final_result, msg.channel, db)
         }
     },
-    // ...require("./roulette/game")
+    ...require("./roulette/gameCommands")
 ]

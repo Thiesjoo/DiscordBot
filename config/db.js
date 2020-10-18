@@ -16,6 +16,4 @@ if (config.databaseType == "local") {
 
 redis.publish("status:update", "database")
 
-database.mongo = require("./databases/mongo")
-
 module.exports = database

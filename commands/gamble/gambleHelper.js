@@ -49,8 +49,8 @@ function inputToNumber(input, balance) {
 //Check if number is between boundaries
 function amountInBoundary(amt, boundaries) {
     if (!amt) return true
-    if (amt < boundaries[0]) return true
-    if (amt > boundaries[1]) return true
+    if (amt <= boundaries[0]) return true
+    if (amt >= boundaries[1]) return true
     return false
 }
 

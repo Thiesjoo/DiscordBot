@@ -1,46 +1,38 @@
 const { MongoClient } = require('mongodb');
 const config = require('..');
-const { getName } = require('../../messages/helper');
-const redis = require("../redisPUB")
-
+const {
+    setUserCache,
+    setUserBalance,
+    setStatus,
+    getUserCache
+} = require("./cache")
+const User = require("./user")
 
 let db = null //(db)
-let users = null;
+let users = null; //the collection out of the db
+//It is safe to let these values be null, because the app will not respond to commands before the database is initialized
 
 MongoClient.connect(
     config.databaseURL,
-    // "mongodb://mongo:27017",
     { useNewUrlParser: true, useUnifiedTopology: true, connectTimeoutMS: 5000, socketTimeoutMS: 5000, serverSelectionTimeoutMS: 5000 })
     .then(result => {
-        console.log("[MONGO] Connected to database:", config.databaseURL)
-        config.ready.database = 1
         db = result.db("discord")
         users = db.collection("users")
+        config.ready.database = 1
+        console.log("[MONGO] Connected to database:", config.databaseURL)
     })
     .catch(err => {
-        console.error("[MONGO]", err)
         config.ready.database = -1
+        console.error("[MONGO]", err)
     })
 
 
 
-
-class User {
-    constructor(id, name, balance, wins = undefined, losses = undefined, symbol = "", _id = null) {
-        this.id = id
-        this.name = name
-        this.balance = parseInt(balance)
-        this.wins = wins
-        this.losses = losses
-        this.symbol = symbol ? symbol : name[0]
-        this._id = _id
-    }
-}
 
 async function createUser(id, name) {
     let oldUser = null;
     try {
-        oldUser = await getUser(id, true);
+        oldUser = await getUser(id, true, true);
     } catch { }
 
     if (oldUser) throw new Error("User already exist" + id)
@@ -52,7 +44,8 @@ async function createUser(id, name) {
     return newUser
 }
 
-async function getUser(id, full = false) {  
+async function getUser(id, full = false, createCall=false) {
+    //TODO: Make name correct
     if (!full) { //Get user out of cache. (When full profile is requested, we need to use the database. For things like wins and loss updates)
         let result = await getUserCache(id);
         if (result) {
@@ -61,18 +54,21 @@ async function getUser(id, full = false) {
             return result
         }
     }
-    
+
     let user = await users.findOne({ id })
-    if (!user) {
-        throw new Error("User not found")
+    if (!user && !createCall) {
+        console.log("Creating new user: ",)
+        user = await createUser(id, "SET NAME: !bal")
+        // throw new Error("User not found")
+    } else {
+        await setUserCache(user)
     }
-    await setUserCache(user)
     user.cached = false;
     return user
 }
 
 async function mongoUpdate(id, update) {
-    let mongoResult = await users.findOneAndUpdate({ id }, update, {returnOriginal: false})
+    let mongoResult = await users.findOneAndUpdate({ id }, update, { returnOriginal: false })
     if (!mongoResult.value) throw new Error("[MONGO] Update didn't work in mongo.js")
     return mongoResult.value
 }
@@ -89,7 +85,7 @@ async function addLoss(id) {
 async function addBalance(id, delta) {
     if (!delta) throw new Error("[ADDBALANCE] No delta provided")
     let result = await mongoUpdate(id, { $inc: { balance: delta } })
-    await setUserCache(result) //Update cache accordingly
+    await setUserBalance(result) //Update cache accordingly
     return result
 }
 
@@ -102,8 +98,8 @@ async function updateSymbol(id, symbol) {
 }
 
 //Leaderboard
-async function getLeaderboard(type,query=-1) {
-    return users.find({}).sort({[type]:query}).limit(5).toArray()
+async function getLeaderboard(type, query = -1) {
+    return users.find({}).sort({ [type]: query }).limit(5).toArray()
 }
 
 
@@ -114,19 +110,8 @@ async function wipeDatabase() {
 }
 
 
-//Cache
 
-async function setUserCache(user) {
-    await redis.hset(`disc:user:${user.id}`, `_id`, `${user._id}`, `balance`, `${user.balance}`, `symbol`, `${user.symbol}`)
-    // await redis.expire(`disc:user:${user.id}`, 60 * config.userExpiry)
-    //User in cache expires in 60 minutes(See config.js).
-}
 
-async function getUserCache(id) {
-    let result = await redis.hgetall(`disc:user:${id}`);
-    if (!(result && result.balance && result._id && result.symbol))  return undefined
-    return new User(result.id, result.name, result.balance, undefined, undefined, result.symbol, result._id)
-}
 
 module.exports = {
     getUser, createUser, updateSymbol,
@@ -134,6 +119,7 @@ module.exports = {
     //Win stuff
     addLoss, addWin, addBalance,
     getLeaderboard,
+    setStatus,
 
 
     //Admin

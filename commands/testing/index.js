@@ -14,11 +14,11 @@ let functions = [
                     case "redis":
                         await redis.flushall()
                     case "mongo":
-                        await database.mongo.wipeDatabase()
+                        await database.wipeDatabase()
                 }
             } else {
                 await redis.flushall()
-                await database.mongo.wipeDatabase()
+                await database.wipeDatabase()
             }
             msg.channel.send("Lol")
         }
@@ -27,7 +27,7 @@ let functions = [
         name: "getuser",
         description: "Get user",
         execute: async function (msg, args) {
-            let result = await database.mongo.getUser(parseMsgMention(msg, args))
+            let result = await database.getUser(parseMsgMention(msg, args))
             console.log(result)
             msg.channel.send(`The result was ${result.cached ? "" : "not "}cached` )
         }
@@ -39,7 +39,7 @@ let functions = [
             let mention = parseMsgMention(msg, args)
             if (!mention) return
             //Create account for current user
-            let result = await database.mongo.createUser(mention, await getName(mention, msg))
+            let result = await database.createUser(mention, await getName(mention, msg))
             console.log(result)
             msg.channel.send("New user created")
         }
@@ -49,7 +49,7 @@ let functions = [
         description: "yes",
         execute: async function (msg, args) {
             //Create account for current user
-            let result = await database.mongo.addWin(msg.author.id)
+            let result = await database.addWin(msg.author.id)
             console.log("Win result:", result)
             msg.channel.send("Added a win to user")
         }
@@ -58,24 +58,27 @@ let functions = [
         name: "getcache",
         description: "Get user from cache",
         execute: async function (msg, args) {
-            let result = await database.mongo.getUserCache(parseMsgMention(msg, args))
+            let result = await database.getUserCache(parseMsgMention(msg, args))
             console.log("Cache result:",result)
-            msg.channel.send(`The result was ${result.cached ? "" : "not "}cached` )
+            msg.reply("See console")
         }
     }, {
         name: "getdatabase",
-        description: "Get user from datavase",
+        description: "Get user from database",
         execute: async function (msg, args) {
-            let result = await database.mongo.getUser(parseMsgMention(msg, args), true)
+            let result = await database.getUser(parseMsgMention(msg, args), true)
             console.log("Database result:",result)
+            msg.reply("See console")
         }
     },
     {
-        name: "add",
-        description: "Get user from datavase",
+        name: "add-money",
+        alias: ["add"],
+        description: "Add free money's",
         execute: async function (msg, args) {
-            let result = await database.mongo.addBalance(parseMsgMention(msg, args), -11000)
+            let result = await database.addBalance(parseMsgMention(msg, args), 20000)
             console.log("Database result:",result)
+            msg.reply("YOU BASTARD")
         }
     },
 ]
