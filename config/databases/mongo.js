@@ -26,13 +26,10 @@ MongoClient.connect(
         console.error("[MONGO]", err)
     })
 
-
-
-
 async function createUser(id, name) {
     let oldUser = null;
     try {
-        oldUser = await getUser(id, true, true);
+        oldUser = await getUser(id, true, true); //True, true: request from database, don't create a new profile
     } catch { }
 
     if (oldUser) throw new Error("User already exist" + id)
@@ -58,7 +55,7 @@ async function getUser(id, full = false, createCall=false) {
     let user = await users.findOne({ id })
     if (!user && !createCall) {
         console.log("Creating new user: ",)
-        user = await createUser(id, "SET NAME: !bal")
+        user = await createUser(id, "SET NAME: !name")
         // throw new Error("User not found")
     } else {
         await setUserCache(user)
@@ -89,6 +86,15 @@ async function addBalance(id, delta) {
     return result
 }
 
+
+
+//Leaderboard
+async function getLeaderboard(type, query = -1) {
+    return users.find({}).sort({ [type]: query }).limit(5).toArray()
+}
+
+//Namechange
+
 async function updateSymbol(id, symbol) {
     if (!symbol) throw new Error("[UPDATESYMBOL] No symbol provided")
     let result = await mongoUpdate(id, { $set: { symbol } })
@@ -97,24 +103,24 @@ async function updateSymbol(id, symbol) {
     return result
 }
 
-//Leaderboard
-async function getLeaderboard(type, query = -1) {
-    return users.find({}).sort({ [type]: query }).limit(5).toArray()
+async function updateName(id, name) {
+    if (!name) throw new Error("[UPDATENAME] No name provided")
+    let result = await mongoUpdate(id, { $set: { name } })
+
+    await setUserCache(result) //Update cache accordingly
+    return result
 }
 
-
 //Admin
-
 async function wipeDatabase() {
     await users.deleteMany({})
 }
 
 
-
-
-
 module.exports = {
-    getUser, createUser, updateSymbol,
+    getUser, createUser, 
+    
+    updateSymbol,updateName,
 
     //Win stuff
     addLoss, addWin, addBalance,

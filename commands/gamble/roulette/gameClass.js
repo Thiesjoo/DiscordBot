@@ -79,13 +79,12 @@ class Game {
                 amount,
             };
 
-            //TODO: Maybe mention user
             if (!amountInBoundary(amount, [0, this.localCache[id]])) throw new Error("You do not have enough money for this transaction")
 
 
             if (bet.type == 'red' || bet.type == 'black' || bet.type == 'even' || bet.type == 'odd' || bet.type === '1-18' || bet.type === '19-36' || bet.type == 'top' || bet.type == 'mid' ||
                 bet.type == 'bot' || bet.type === '1st' || bet.type === '2nd' || bet.type === '3rd') {
-                if (bet.amount <= conf.minimumBetOutside) throw new Error(`${bet.type}/${bet.amount} You have to bet at least $${conf.minimumBetOutside} for bets on groups.`)
+                if (bet.amount < conf.minimumBetOutside) throw new Error(`${bet.type}/${bet.amount} You have to bet at least $${conf.minimumBetOutside} for bets on groups.`)
                
                
                 this.localCache[id] -= amount
@@ -112,6 +111,8 @@ class Game {
             }
 
         } catch (err) {
+            delete this.localCache[id]
+
             console.error(err)
             this.active_channel.send(err.message)
         }
@@ -144,92 +145,92 @@ class Game {
             if (bet.type == 'red' && this.redCount.number < 30 && this.redCount.symbols.indexOf(symbolToUse) == -1) {
                 this.redCount.number += 1;
                 this.redCount.symbols += symbolToUse;
-                board.boardRow20 = board.boardRow20.substring(0, this.redCount.number - 1) + symbolToUse + board.boardRow20.substring(this.redCount.number);
+                this.board.boardRow20 = this.board.boardRow20.substring(0, this.redCount.number - 1) + symbolToUse + this.board.boardRow20.substring(this.redCount.number);
             } else if (bet.type == 'black' && this.blackCount.number < 40 && this.blackCount.symbols.indexOf(symbolToUse) == -1) {
                 this.blackCount.number += 1;
                 this.blackCount.symbols += symbolToUse;
-                board.boardRow20 = board.boardRow20.substring(0, this.blackCount.number - 1) + symbolToUse + board.boardRow20.substring(this.blackCount.number);
+                this.board.boardRow20 = this.board.boardRow20.substring(0, this.blackCount.number - 1) + symbolToUse + this.board.boardRow20.substring(this.blackCount.number);
             } else if (bet.type == 'odd' && this.oddCount.number < 50 && this.oddCount.symbols.indexOf(symbolToUse) == -1) {
                 this.oddCount.number += 1;
                 this.oddCount.symbols += symbolToUse;
-                board.boardRow20 = board.boardRow20.substring(0, this.oddCount.number - 1) + symbolToUse + board.boardRow20.substring(this.oddCount.number);
+                this.board.boardRow20 = this.board.boardRow20.substring(0, this.oddCount.number - 1) + symbolToUse + this.board.boardRow20.substring(this.oddCount.number);
             } else if (bet.type == 'even' && this.evenCount.number < 20 && this.evenCount.symbols.indexOf(symbolToUse) == -1) {
                 this.evenCount.number += 1;
                 this.evenCount.symbols += symbolToUse;
-                board.boardRow20 = board.boardRow20.substring(0, this.evenCount.number - 1) + symbolToUse + board.boardRow20.substring(this.evenCount.number);
+                this.board.boardRow20 = this.board.boardRow20.substring(0, this.evenCount.number - 1) + symbolToUse + this.board.boardRow20.substring(this.evenCount.number);
             } else if (bet.type == 'top' && this.topCount.number < 69 && this.topCount.symbols.indexOf(symbolToUse) == -1) {
                 this.topCount.number += 1;
                 this.topCount.symbols += symbolToUse;
-                board.boardRow4 = board.boardRow4.substring(0, this.topCount.number - 1) + symbolToUse + board.boardRow4.substring(this.topCount.number);
+                this.board.boardRow4 = this.board.boardRow4.substring(0, this.topCount.number - 1) + symbolToUse + this.board.boardRow4.substring(this.topCount.number);
             } else if (bet.type == 'mid' && this.midCount.number < 69 && this.midCount.symbols.indexOf(symbolToUse) == -1) {
                 this.midCount.number += 1;
                 this.midCount.symbols += symbolToUse;
-                board.boardRow8 = board.boardRow8.substring(0, this.midCount.number - 1) + symbolToUse + board.boardRow8.substring(this.midCount.number);
+                this.board.boardRow8 = this.board.boardRow8.substring(0, this.midCount.number - 1) + symbolToUse + this.board.boardRow8.substring(this.midCount.number);
             } else if (bet.type == 'bot' && this.botCount.number < 69 && this.botCount.symbols.indexOf(symbolToUse) == -1) {
                 this.botCount.number += 1;
                 this.botCount.symbols += symbolToUse;
-                board.boardRow12 = board.boardRow12.substring(0, this.botCount.number - 1) + symbolToUse + board.boardRow12.substring(this.botCount.number);
+                this.board.boardRow12 = this.board.boardRow12.substring(0, this.botCount.number - 1) + symbolToUse + this.board.boardRow12.substring(this.botCount.number);
             } else if (bet.type === '1st') {
                 if (this.firstCount.number < 23 && this.firstCount.symbols.indexOf(symbolToUse) == -1) {
                     this.firstCount.number += 1;
                     this.firstCount.symbols += symbolToUse;
-                    board.boardRow16 = board.boardRow16.substring(0, this.firstCount.number - 1) + symbolToUse + board.boardRow16.substring(this.firstCount.number);
+                    this.board.boardRow16 = this.board.boardRow16.substring(0, this.firstCount.number - 1) + symbolToUse + this.board.boardRow16.substring(this.firstCount.number);
                 }
             } else if (bet.type === '2nd') {
                 if (this.secondCount.number < 43 && this.secondCount.symbols.indexOf(symbolToUse) == -1) {
                     this.secondCount.number += 1;
                     this.secondCount.symbols += symbolToUse;
-                    board.boardRow16 = board.boardRow16.substring(0, this.secondCount.number - 1) + symbolToUse + board.boardRow16.substring(this.secondCount.number);
+                    this.board.boardRow16 = this.board.boardRow16.substring(0, this.secondCount.number - 1) + symbolToUse + this.board.boardRow16.substring(this.secondCount.number);
                 }
             } else if (bet.type === '3rd') {
                 if (this.thirdCount.number < 63 && this.thirdCount.symbols.indexOf(symbolToUse) == -1) {
                     this.thirdCount.number += 1;
                     this.thirdCount.symbols += symbolToUse;
-                    board.boardRow16 = board.boardRow16.substring(0, this.thirdCount.number - 1) + symbolToUse + board.boardRow16.substring(this.thirdCount.number);
+                    this.board.boardRow16 = this.board.boardRow16.substring(0, this.thirdCount.number - 1) + symbolToUse + this.board.boardRow16.substring(this.thirdCount.number);
                 }
             } else if (bet.type === '1-18') {
                 if (this.lowCount.number < 11 && this.lowCount.symbols.indexOf(symbolToUse) == -1) {
                     this.lowCount.number += 1;
                     this.lowCount.symbols += symbolToUse;
-                    board.boardRow20 = board.boardRow20.substring(0, this.lowCount.number - 1) + symbolToUse + board.boardRow20.substring(this.lowCount.number);
+                    this.board.boardRow20 = this.board.boardRow20.substring(0, this.lowCount.number - 1) + symbolToUse + this.board.boardRow20.substring(this.lowCount.number);
                 }
             } else if (bet.type === '19-36') {
                 if (this.highCount.number < 61 && this.highCount.symbols.indexOf(symbolToUse) == -1) {
                     this.highCount.number += 1;
                     this.highCount.symbols += symbolToUse;
-                    board.boardRow20 = board.boardRow20.substring(0, this.highCount.number - 1) + symbolToUse + board.boardRow20.substring(this.highCount.number);
+                    this.board.boardRow20 = this.board.boardRow20.substring(0, this.highCount.number - 1) + symbolToUse + this.board.boardRow20.substring(this.highCount.number);
                 }
             } else if (indexOfTop > -1 && this.topRow[indexOfTop].count < 4) {
                 if (this.topRow[indexOfTop].symbols.indexOf(symbolToUse) == -1) {
                     let indexPut = parseInt(bet.type) + this.topRow[indexOfTop].count + ((indexOfTop + 1) * 2) - 1;
                     this.topRow[indexOfTop].count += 1;
                     this.topRow[indexOfTop].symbols += symbolToUse;
-                    board.boardRow4 = board.boardRow4.substring(0, indexPut) + symbolToUse + board.boardRow4.substring(indexPut + 1);
+                    this.board.boardRow4 = this.board.boardRow4.substring(0, indexPut) + symbolToUse + this.board.boardRow4.substring(indexPut + 1);
                 }
             } else if (indexOfMid > -1 && this.middleRow[indexOfMid].count < 4) {
                 if (this.middleRow[indexOfMid].symbols.indexOf(symbolToUse) == -1) {
                     let indexPut = parseInt(bet.type) + this.middleRow[indexOfMid].count + ((indexOfMid + 1) * 2);
                     this.middleRow[indexOfMid].count += 1;
                     this.middleRow[indexOfMid].symbols += symbolToUse;
-                    board.boardRow8 = board.boardRow8.substring(0, indexPut) + symbolToUse + board.boardRow8.substring(indexPut + 1);
+                    this.board.boardRow8 = this.board.boardRow8.substring(0, indexPut) + symbolToUse + this.board.boardRow8.substring(indexPut + 1);
                 }
             } else if (indexOfBot > -1 && this.bottomRow[indexOfBot].count < 4) {
                 if (this.bottomRow[indexOfBot].symbols.indexOf(symbolToUse) == -1) {
                     let indexPut = parseInt(bet.type) + this.bottomRow[indexOfBot].count + ((indexOfBot + 1) * 2) + 1;
                     this.bottomRow[indexOfBot].count += 1;
                     this.bottomRow[indexOfBot].symbols += symbolToUse;
-                    board.boardRow12 = board.boardRow12.substring(0, indexPut) + symbolToUse + board.boardRow12.substring(indexPut + 1);
+                    this.board.boardRow12 = this.board.boardRow12.substring(0, indexPut) + symbolToUse + this.board.boardRow12.substring(indexPut + 1);
                 }
             } else if (parseInt(bet.type) === 0 && this.zeroCount.number < 3) {
                 if (this.zeroCount.symbols.indexOf(symbolToUse) == -1) {
                     this.zeroCount.number += 1;
                     this.zeroCount.symbols += symbolToUse;
-                    board.boardRow8 = board.boardRow8.substring(0, this.zeroCount.number - 1) + symbolToUse + board.boardRow8.substring(this.zeroCount.number);
+                    this.board.boardRow8 = this.board.boardRow8.substring(0, this.zeroCount.number - 1) + symbolToUse + this.board.boardRow8.substring(this.zeroCount.number);
                 }
             }
         }
-        this.active_channel.send(board.boardRow + board.boardRow1 + board.boardRow2 + board.boardRow3 + board.boardRow4 + board.boardRow5 + board.boardRow6 + board.boardRow7 + board.boardRow8 + board.boardRow9 + board.boardRow10 + board.boardRow11 + board.boardRow12 + board.boardRow13 + board.boardRow14 + board.boardRow15 +
-            board.boardRow16 + board.boardRow17 + board.boardRow18 + board.boardRow19 + board.boardRow20 + board.boardRow21 + board.boardRowFinal)
+        this.active_channel.send(this.board.boardRow + this.board.boardRow1 + this.board.boardRow2 + this.board.boardRow3 + this.board.boardRow4 + this.board.boardRow5 + this.board.boardRow6 + this.board.boardRow7 + this.board.boardRow8 + this.board.boardRow9 + this.board.boardRow10 + this.board.boardRow11 + this.board.boardRow12 + this.board.boardRow13 + this.board.boardRow14 + this.board.boardRow15 +
+            this.board.boardRow16 + this.board.boardRow17 + this.board.boardRow18 + this.board.boardRow19 + this.board.boardRow20 + this.board.boardRow21 + this.board.boardRowFinal)
     }
 
     async rollNumber() {
@@ -309,7 +310,6 @@ class Game {
                 } else {
                     pending.push(db.addLoss(player.id))
                 }
-
 
                 pending.push(db.setStatus(player.id, ""))
             }

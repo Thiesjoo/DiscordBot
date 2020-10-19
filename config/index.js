@@ -10,6 +10,7 @@ module.exports = {
 
 
     adminUser: "299983320815763456", //Discord tag for the admin user. (Can add roles and mock jacco)
+    bullyUser: "694164639709265930",
     waterDelay: 60_000, //Delay for water reminder
 
     globalChannels: ["testing", "gambling"], // Channels that the bot is active in
@@ -30,4 +31,8 @@ module.exports = {
         duration: 50, // Duration in seconds of the game
         minTime: 10//Minium time between board-draws
     },
+
+    perms: {
+        admin: "lelijk" //Name of admin role in your server
+    }
 }

@@ -37,9 +37,10 @@ module.exports = [{
             if (user.cached && user.ingame == msg.channel.id) {
                 msg.channel.send("You are already ingame")
             } else {
-                db.setStatus(msg.author.id, msg.channel.id)
+               
                 let game = games[msg.channel.id]
-                await game.bet(msg.author.id, args[0], args[1] ,msg)
+                let result = await game.bet(msg.author.id, args[0], args[1] ,msg)
+                if (result)  db.setStatus(msg.author.id, msg.channel.id)
             }
         }
     }

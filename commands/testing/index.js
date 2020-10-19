@@ -13,14 +13,16 @@ let functions = [
                 switch (args[0]) {
                     case "redis":
                         await redis.flushall()
+                        console.log("Redis gone")
                     case "mongo":
                         await database.wipeDatabase()
+                        console.log("Mongo gone")
                 }
             } else {
                 await redis.flushall()
                 await database.wipeDatabase()
+                console.log("Mongo and redis gone")
             }
-            msg.channel.send("Lol")
         }
     },
     {
@@ -76,7 +78,7 @@ let functions = [
         alias: ["add"],
         description: "Add free money's",
         execute: async function (msg, args) {
-            let result = await database.addBalance(parseMsgMention(msg, args), 20000)
+            let result = await database.addBalance(parseMsgMention(msg, args), 1000000)
             console.log("Database result:",result)
             msg.reply("YOU BASTARD")
         }

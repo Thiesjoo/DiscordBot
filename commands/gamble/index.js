@@ -1,6 +1,6 @@
 
 module.exports = {
-    functions: [...require("./balance"),
+    functions: [...require("./money"),
      ...require("./games"),
      ],
     events: []

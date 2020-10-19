@@ -16,7 +16,7 @@ module.exports = [
             }
 
             const amount = inputToNumber(args[0], user.balance)
-            if (amountInBoundary(amount, [0, user.balance])) {
+            if (!amountInBoundary(amount, [0, user.balance])) {
                 msg.reply("Please provide a valid amount. Usage: !flip <amount>")
                 return
             }

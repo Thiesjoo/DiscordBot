@@ -5,17 +5,22 @@ This is just a meme, don't take this seriously
 
 ## Features
 
-- Help message (!help)
-- Purge messages
-- Water reminder
-- Binas memes
-- Rick roll everybody in a voice channel
+- Fun
+    - Help message (!help)
+    - Water reminder
+    - Binas memes
+    - Rick roll everybody in a voice channel
 
-### TODO:
-- Add a mongodb database
-- Add redis for caching things like: user following, game status, 
-- Admin role
+- Admin
+    - Purge messages
+    - Create roles from bot
+        - Add them to users
+    - Certain commands only available to admins
 
+- Games
+    - Roulette system
+    - Coinflip system
+    - With an entire economy
 
 ## Requirements
 
@@ -67,9 +72,36 @@ docker run --env TOKEN="<your token here>" th_discordbot
 ## Customization
 In the ```config/index.js``` file you will find some configuration options
 
+### Adding new features
+Every directory in ```./commands``` has an ```index.js``` file. That file exports 2 arrays.
+1 with functions and 1 with events.
+The layout of a function is like this:
+```js
+{
+    name: "ping", //Name and command of the function
+    alias: ["pong"], //Aliases of the command
+    perms: ["admin"], //Which roles can access the command
+    description: "returns pong", //Description for the help text
+    admin: true, //If the command is admin, it will not show up in the helptext,
+    execute(msg,args) {
+        //your function
+    }
+}
+```
+
+#### Adding events
+To add an event, simply add this to the events array:
+```js
+{
+    name: "messageUpdate", //Name of the event. Found on discordjs website
+    execute: async (msgOld, msgNew, bot) => { //Function to call when event is callend
+    }
+}
+
+
+```
 
 ## Redis naming
-
 During games users and their balance are stored in the redis cache
 ```disc:user:<user id> = {data}```
 Data will be something like this:
@@ -77,15 +109,11 @@ Data will be something like this:
 {
     _id: id,
     symbol: "<symbol of user>",
-    balance: "<balance of user>"
+    balance: "<balance of user>",
+    name: "<name of user>"
 }
 ```
 The rest of the data is not needed while in a game, and isn't accessed often.
-
-
-
-Roulette game stores your bets
-```disc:roulette:user:<user id>```
 
 
 ## Author

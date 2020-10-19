@@ -10,6 +10,7 @@ module.exports = [{
     async execute(msg, args) {
         let mention = parseMsgMention(msg, args)
         let user = await db.getUser(mention)
+        //Add ingame balance
 
         msg.channel.send(`<@${mention}>'s balance is: $${user.balance}`)
     },
@@ -26,20 +27,11 @@ module.exports = [{
         }
 
         if (user.cached && user.ingame) {
-
+            msg.reply("You are ingame, can't get free money")
         } else {
             user = await db.addBalance(mention, 2000)
             msg.channel.send(`<@${mention}>'s balance is: $${user.balance}`);
         }
-
-        // if ()
-
-        // if (mention in global.user_cache) {
-        //     msg.reply("You are currently betting, please finish the game first!")
-        // } else {
-        //     let balance = await db.addBalance(mention, 2000)
-        //     msg.channel.send(`<@${mention}>'s balance is: $${balance}`);
-        // }
     },
 },
 {
@@ -114,7 +106,7 @@ module.exports = [{
 
 
         const amount = inputToNumber(args[1], user1.balance)
-        if (amountInBoundary(amount, [0, user1.balance])) {
+        if (!amountInBoundary(amount, [0, user1.balance])) {
             msg.reply("Please provide a valid amount. Usage: !transfer @Person <amount>")
             return
         }

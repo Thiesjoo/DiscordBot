@@ -7,6 +7,7 @@ module.exports = {
             name: "messageUpdate",
             execute: async (msgOld, msgNew, bot) => {
                 if (msgNew.author.bot) return
+                if (msgNew.content == msgOld.content) return
                 
                 //Check if old message was processed
                 console.log("MSG EDITED")
