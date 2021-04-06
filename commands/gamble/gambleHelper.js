@@ -4,7 +4,7 @@ const outcomeMap = { true: "win! :smiley:", false: "lose! :sob:" }
 
 async function processResult(id, result, channel, db) {
     //result : {delta: 100, gameType: "Coinflip", bet: 1000}
-    console.log(id,result)
+    console.log(id, result)
     let user = await db.addBalance(id, result.delta)
     if (result.delta > 0) {
         await db.addWin(id)
@@ -49,8 +49,7 @@ function inputToNumber(input, balance) {
 //Check if number is between boundaries
 function amountInBoundary(amt, boundaries) {
     if (!amt) return false
-    if (amt <= boundaries[1]) return true
-    if (amt >= boundaries[0]) return true
+    if (amt <= boundaries[1] && amt >= boundaries[0]) return true
     return false
 }
 

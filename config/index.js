@@ -4,10 +4,10 @@ dotenv.config()
 module.exports = {
     databaseType: "mongo", // Only 'local' is currently supported
     // databaseURL: "db/users.db", //Url to mongodb database or file location for local
-    databaseURL: process.env.DB_URL,
+    databaseURL: process.env.DB_URL || process.env.QOVERY_DATABASE_MONGO_DISCORD_CONNECTION_URI,
 
 
-    redisURL: process.env.REDIS_URL,
+    redisURL: process.env.REDIS_URL || process.env.QOVERY_DATABASE_REDIS_DISCORD_CONNECTION_URI,
 
     commandDir: "./commands", // Directory where commands are stored
 
