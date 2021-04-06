@@ -1,0 +1,26 @@
+{
+	"name": "DiscordBot",
+	"dockerComposeFile": "docker-compose.yml",
+	"shutdownAction": "stopCompose",
+	"service": "api",
+	"forwardPorts": [3000],
+	"workspaceFolder": "/workspace",
+	"settings": {
+		"terminal.integrated.shell.linux": "/bin/zsh"
+	},
+	"remoteEnv": {
+		"LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
+	},
+	"extensions": [
+		"dbaeumer.vscode-eslint",
+		"esbenp.prettier-vscode",
+		"mongodb.mongodb-vscode",
+		"eamodio.gitlens",
+		"ms-azuretools.vscode-docker",
+		"streetsidesoftware.code-spell-checker",
+		"gruntfuggly.todo-tree",
+		"mike-co.import-sorter"
+	],
+	"postCreateCommand": "npm ci",
+	"remoteUser": "vscode"
+}

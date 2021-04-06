@@ -5,7 +5,7 @@ module.exports = {
     description: "Purge last messages. Usage !purge <amount>, with 0<amount<100",
     perms: config.perms.admin,
     execute(msg, args) {
-        let amount = parseInt(args[0])+1
+        let amount = parseInt(args[0]) + 1
         if (!amount || amount < 0 || amount > 100) {
             msg.reply("Not a valid number")
             return

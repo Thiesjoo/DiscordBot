@@ -1,5 +1,0 @@
-FROM th_discordbot_dev
-
-COPY . .
-
-CMD [ "npm", "start" ]

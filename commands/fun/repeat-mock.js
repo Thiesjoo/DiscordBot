@@ -1,5 +1,5 @@
 const config = require("../../config");
-const db = require("../../config/db")
+const { parseMention } = require("../../messages/helper")
 let repeat = false
 let following = ""
 
@@ -10,7 +10,7 @@ module.exports = {
         alias: ["ar", "a-r"],
         execute(msg, args) {
             if (msg.author.id == config.adminUser) {
-                let mention = db.parseMention(args[0], msg)
+                let mention = parseMention(args[0], msg)
                 if (!mention) return
 
                 following = mention
@@ -28,7 +28,7 @@ module.exports = {
         execute(msg, args) {
             if (msg.author.id == config.adminUser) {
                 repeat = !repeat
-                msg.channel.send(`Mocking is currently: ${repeat ? "enabled":"disabled"}`);
+                msg.channel.send(`Mocking is currently: ${repeat ? "enabled" : "disabled"}`);
             }
         },
     },

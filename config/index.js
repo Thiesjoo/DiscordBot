@@ -1,19 +1,22 @@
+const dotenv = require("dotenv");
+dotenv.config()
+
 module.exports = {
     databaseType: "mongo", // Only 'local' is currently supported
     // databaseURL: "db/users.db", //Url to mongodb database or file location for local
-    databaseURL: "mongodb://mongo:27017",
+    databaseURL: process.env.DB_URL,
 
 
-    redisURL: "redis://redis",
+    redisURL: process.env.REDIS_URL,
 
     commandDir: "./commands", // Directory where commands are stored
 
 
-    adminUser: "299983320815763456", //Discord tag for the admin user. (Can add roles and mock jacco)
-    bullyUser: "694164639709265930",
+    adminUser: process.env.ADMIN_USER, //Discord tag for the admin user. (Can add roles and mock jacco)
+    bullyUser: process.env.TRACK_USER,
     waterDelay: 60_000, //Delay for water reminder
 
-    globalChannels: ["testing", "gambling"], // Channels that the bot is active in
+    globalChannels: ["testing", "gambling", "bot-spam"], // Channels that the bot is active in
 
 
     ready: { "redis": 0, "database": 0, "discord": 0 }, //0 is working, 1 is active, -1 is broken
@@ -33,6 +36,6 @@ module.exports = {
     },
 
     perms: {
-        admin: "lelijk" //Name of admin role in your server
+        admin: "ADMIN" //Name of admin role in your server
     }
 }
