@@ -1,0 +1,18 @@
+---
+application:
+  name: "discordbot"
+  project: "Testing"
+  organization: "QoveryCommunity"
+databases:
+- type: "MONGODB"
+  name: "discord"
+  version: "4.4"
+- type: "REDIS"
+  name: "discord"
+  version: "6"
+routers:
+- name: "main-discordbot"
+  routes:
+  - application_name: "discordbot"
+    paths:
+    - "/*"
