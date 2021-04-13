@@ -4,8 +4,6 @@ WORKDIR /opt/discordbot
 COPY package*.json ./
 RUN npm ci --only=production
 
-
-
 RUN chown node:node /opt/discordbot && \
   apk add --no-cache dumb-init 
 

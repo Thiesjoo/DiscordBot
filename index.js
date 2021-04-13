@@ -63,7 +63,7 @@ function updatePresence() {
     console.log("[MAIN] Status:", presence)
 
     bot.user.setPresence({
-        activity: { name: presence, type: "LISTENING" }, status: rd.discord && rd.redis && rd.database ? "" : "idle"
+        activity: { name: presence, type: "LISTENING" }, status: (rd.discord && rd.redis && rd.database) ? "" : "idle"
     })
 }
 
@@ -72,11 +72,16 @@ function updatePresence() {
 process.stdin.resume();//so the program will not close instantly
 
 function exitHandler(options, exitCode) {
-    if (options.cleanup) bot.destroy()
-    if (options.exit) process.exit();
-    console.log("Terminated")
-    console.log("Can we wait?")
-
+    console.log(options, exitCode);
+    if (options.cleanup) {
+        console.log('Cleaning up!');
+    }
+    if (exitCode || exitCode === 0) {
+        console.log('Exitcode:', exitCode);
+    }
+    if (options.exit) {
+        process.exit(exitCode);
+    }
 }
 
 //do something when app is closing
@@ -90,4 +95,4 @@ process.on('SIGUSR1', exitHandler.bind(null, { exit: true }));
 process.on('SIGUSR2', exitHandler.bind(null, { exit: true }));
 
 //catches uncaught exceptions
-// process.on('uncaughtException', exitHandler.bind(null, { exit: true }));
+process.on('uncaughtException', exitHandler.bind(null, { exit: true }));
