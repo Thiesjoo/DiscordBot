@@ -2,7 +2,15 @@ FROM node:12-alpine
 WORKDIR /opt/discordbot
 
 COPY package*.json ./
-RUN npm install
+RUN npm ci --only=production
 
-COPY . .
-CMD [ "npm", "start" ]
+
+
+RUN chown node:node /opt/discordbot && \
+  apk add --no-cache dumb-init 
+
+USER node
+COPY . . 
+
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["./node_modules/.bin/forever", "index.js"]

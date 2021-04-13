@@ -17,8 +17,6 @@ bot.login(TOKEN);
 global.bot = bot //Only for gamble commands
 //FIXME: Remove this
 
-
-
 // Discord Commands
 require("./messages/generateHelp")(bot)
 require("./messages/initCommands")(bot)
@@ -27,11 +25,10 @@ const processMessage = require('./messages/processMessage')(bot);
 
 
 // Redis:
-
 const redis = require("./config/redisSUB")
 
 redis.on("ready", async () => {
-    redis.on("message", (channel,message) => {
+    redis.on("message", (channel, message) => {
         switch (channel) {
             case "status:update":
                 console.log(`[MAIN] ${message} is updating`)
@@ -45,6 +42,7 @@ redis.on("ready", async () => {
 
 bot.on('ready', () => {
     config.ready.discord = 1;
+    console.log(bot.user)
     updatePresence()
     console.log(`[BOT] Logged in as ${bot.user.tag}!`);
 });
@@ -52,7 +50,7 @@ bot.on('ready', () => {
 bot.on('message', msg => {
     const rd = config.ready
 
-    if (rd.discord && rd.redis && rd.database)processMessage(msg)
+    if (rd.discord && rd.redis && rd.database) processMessage(msg)
 });
 
 
@@ -60,7 +58,7 @@ function updatePresence() {
 
     const rd = config.ready
     const st = config.statusIcons;
-    const presence =  `Messages, Bot: ${st[rd.discord]}, Redis: ${st[rd.redis]}, Database: ${st[rd.database]}`
+    const presence = `Messages, Bot: ${st[rd.discord]}, Redis: ${st[rd.redis]}, Database: ${st[rd.database]}`
 
     console.log("[MAIN] Status:", presence)
 
